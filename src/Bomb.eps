@@ -1,0 +1,186 @@
+import Map;
+import Player;
+import Helpers;
+
+const BombQ						= EUDArray(20);
+var QIndex, QCount, boom;
+
+const row						= Map.row;
+const col						= Map.col;
+
+const Computer					= Helpers.Computer;
+const UnitID_Player 			= Helpers.UnitID_Player;
+const UnitID_Bomb				= Helpers.UnitID_Bomb;
+const UnitID_Fire				= Helpers.UnitID_Fire;
+const UnitID_Wall				= Helpers.UnitID_Wall;
+const UnitID_Box				= Helpers.UnitID_Box;
+
+const loc2 = $L('loc2');
+const loc3 = $L('loc3');
+const scale						= Helpers.scale;
+
+//-------------------------------------------------
+
+function NewBomb(unitEpd)
+{
+	const x, y = Map.GetTileIndex(unitEpd);
+	Map.SetMapXY(x, y, unitEpd);
+}
+
+function Push(unitEpd)
+{
+	BombQ[QIndex] = unitEpd;
+	QIndex = QIndex + 1; //Index ++
+	QCount = QCount + 1; //Count ++
+}
+function InitQ()
+{
+	for(var i=0; i<20; i++)
+		BombQ[i] = 0;
+	QIndex = 0;
+	QCount = 0;
+}
+
+function CreateItem(location);
+function Explosion(unitEpd);
+function CreateFire(fireRange, direction, _x, _y);
+function Boom();
+function CheckBomb()
+{// 폭탄 타이머 체크, 폭발 시작 
+	for(var i=0; i<row; i++)
+	{
+		for(var j=0; j<col; j++)
+		{
+			const unitEpd = Map.GetMapXY(i, j);
+			if( unitEpd != 0 || 
+				unitEpd != UnitID_Fire ||
+				unitEpd != UnitID_Box ||
+				unitEpd != UnitID_Wall)
+			{
+				if(MemoryEPD(unitEpd + 0x114/4, Exactly, 1))
+				{
+					Push(unitEpd);
+				}
+			}
+		}
+	}
+	var k = 0;
+	while(QCount > 0) //Count > 0
+	{	
+		Explosion(BombQ[k]);
+		k++;
+		QCount = QCount - 1; // Count--
+	}
+	if(QIndex > 0)
+	{
+		Boom();
+		InitQ();
+	}
+}
+
+function Boom()
+{// 체크한 블록을 처리함. 실질적인 폭발 
+	boom = 1;
+	for(var i=0; i<row; i++)
+	{
+		for(var j=0; j<col; j++)
+		{
+			if(Map.GetMapXY(i, j) == UnitID_Fire)
+			{
+				Map.SetMapXY(i, j, 0);
+				const x, y = Map.GetTileXY(i, j);
+				Helpers.EUDSetLocation(loc2, x, y);
+				KillUnitAt(All, '(men)', loc2+1, $Force1);
+				RemoveUnitAt(All, '(any unit)', loc2+1, Computer);
+				CreateUnit(1, UnitID_Fire, loc2+1, Computer);
+			}
+			if(Map.GetMapXY(i, j) == Helpers.DeadBox)
+			{
+				Map.SetMapXY(i, j, 0);
+				const x, y = Map.GetTileXY(i, j);
+				Helpers.EUDSetLocation(loc2, x, y);
+				RemoveUnitAt(All, '(men)', loc2+1, Computer);
+				CreateItem(loc2);
+			}
+		}
+	}
+	KillUnit(UnitID_Fire, Computer);
+	boom = 0;
+}
+
+function Explosion(unitEpd)
+{// 폭탄 사거리에 맞게 불 생성
+	const player = dwbreak(dwread_epd(unitEpd + 0x4C / 4))[[2]];
+	const fireRange = Player.GetBombRange(player);
+
+	const x, y = Map.GetTileIndex(unitEpd); // 해당좌표의 unitEpd
+	Map.SetMapXY(x, y, 0);  // 초기화
+
+	const x2, y2 = Map.GetTileXY(x, y);
+	Helpers.EUDSetLocation(loc2, x2, y2);
+	RemoveUnitAt(1, UnitID_Bomb, loc2+1, player);
+
+	for(var i=0; i<4; i++)
+	{
+		CreateFire(fireRange, i, x, y);
+	}
+}
+
+
+
+function CreateFire(fireRange, direction, _x, _y)
+{// 불생성 지역에, 있는 지형/폭탄 탐지
+	Map.SetMapXY(_x, _y, UnitID_Fire);
+	for(var j=1; j<=fireRange; j++)
+	{
+		var x = _x;
+		var y = _y;
+
+		if(direction == 0) 
+		{
+			if(x < j) x = 0;
+			else x = x - j;
+		}
+		if(direction == 1)
+		{
+			if(y < j) y = 0;
+			else y = y - j;
+		}
+		if(direction == 2)
+		{
+			if(x + j > row) x = row;
+			else x = x + j;
+		}
+		if(direction == 3)
+		{
+			if(y + j > col) y = col;
+			else y = y + j;
+		}
+		
+		if (Map.GetMapXY(x, y) == UnitID_Wall) return;	// Imapssible
+		else if (Map.GetMapXY(x, y) == UnitID_Fire) 	// Fire
+			Map.SetMapXY(x, y, UnitID_Fire);
+		else if (Map.GetMapXY(x, y) == 0) 				// Empty
+			Map.SetMapXY(x, y, UnitID_Fire);	
+		else if (Map.GetMapXY(x, y) == UnitID_Box) 		// Breakable
+		{
+			Map.SetMapXY(x, y, Helpers.DeadBox);
+			return;
+		}
+		else if (Map.GetMapXY(x, y) == Helpers.DeadBox) return;
+		else 											// bomb (unitEpd)
+		{
+			const unitEpd = Map.GetMapXY(x, y);
+			Push(unitEpd);
+		}
+	}
+}
+
+function CreateItem(location)
+{
+	if(Helpers.GetRandom(0,2))// 0~1
+	{
+		const randNum = Helpers.GetRandom(0, 9)%6; //0~8 -> 0~5
+		CreateUnit(1, Helpers.ItemList[randNum], location +1, Computer);
+	}
+}

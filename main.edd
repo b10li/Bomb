@@ -1,0 +1,5 @@
+[main]
+input:empty.scx
+output:Bomberman.scx
+[src\Main.eps]
+[eudTurbo]

@@ -1,0 +1,65 @@
+
+import Player;
+import Bomb;
+import Map;
+
+function onPluginStart()
+{
+	randomize();
+	Map.GetMap();
+	Map.Render();
+	
+	EUDPlayerLoop()();
+	var player = getcurpl();
+	if(player < 6) //P1~P6
+		Player.InitPlayer(player);
+	EUDEndPlayerLoop();
+	
+}
+
+function GameEnd();
+function beforeTriggerExec() 
+{
+	
+	Bomb.CheckBomb();
+	EUDPlayerLoop()();
+	var player = getcurpl();
+	if(player < 6)
+	{
+		Player.PlaceBomb(Player.GetPlayerEpd(player));
+		Player.FollowLocation(player);
+		Player.ItemCollect(player);
+		Player.OffRide(player);
+	}
+	EUDEndPlayerLoop();
+
+	GameEnd();
+}
+
+function afterTriggerExec() 
+{
+	// eudturbo
+	SetMemory(0x6509A0, SetTo, 0);  
+}
+
+function GameEnd()
+{
+	if(Command($Force1, AtMost, 1, '(men)') && 
+		Command(7, Exactly, 0, 15) &&
+		Accumulate($Force1, AtLeast, 1, OreAndGas))
+	{
+		SetDeaths(7, Add, 1, 200);
+	}
+	if(Deaths(7, AtLeast, 24, 200))
+	{
+		if(Command($Force1, AtMost, 1, '(men)'))
+		{
+			EUDPlayerLoop()();
+			DisplayText("\r\n\r\n\r\n\r\n\r\n\x13니가 이겼다\r\n\r\n\r\n\r\n\r\n");
+			Victory();
+			EUDEndPlayerLoop();
+		}
+		else
+			SetDeaths(7, SetTo, 0, 200);
+	}
+}

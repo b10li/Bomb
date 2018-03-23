@@ -1,0 +1,236 @@
+import Helpers;
+import Map;
+import Bomb;
+
+const scale						= Helpers.scale;
+const Computer		 			= Helpers.Computer;
+const UnitID_Civilian 			= Helpers.UnitID_Player[0];
+const UnitID_Tank 				= Helpers.UnitID_Player[2];
+const UnitID_Goliath 			= Helpers.UnitID_Player[1];
+const UnitID_Bomb				= Helpers.UnitID_Bomb;
+const UnitID_Fire				= Helpers.UnitID_Fire;
+const EPD_Players	 			= EUDArray(6);	
+const MaxRange					= 5;
+const MaxBomb					= 8;
+const PlayerSpeed				= EUDArray(6);
+
+const loc0 		= $L('loc0');
+const loc 		= $L('loc');
+const loc_p1 	= $L('p1');
+const loc_p2 	= $L('p2');
+const loc_p3 	= $L('p3');
+const loc_p4 	= $L('p4');
+const loc_p5 	= $L('p5');
+const loc_p6 	= $L('p6');
+
+const loclist	= [loc_p1, loc_p2, loc_p3, loc_p4, loc_p5, loc_p6];
+
+//--------------------------------------------------------
+
+function SetPlayerEpd(player)
+{
+	EPD_Players[player] = epdread_epd(EPD(0x628438));
+}
+
+function GetPlayerEpd(player)
+{
+	return EPD_Players[player];
+}
+
+function GetCurrentBN(player);
+function GetBombNumber(player);
+function GetBombRange(player);
+function SetBombNumber(player, number);
+function SetBombRange(player, number);
+function InitPlayer(player)
+{
+	SetPlayerEpd(player);
+	CreateUnit(1, UnitID_Civilian, loclist[player]+1, player);
+	SetBombNumber(player, 1);
+	SetBombRange(player, 1);
+	PlayerSpeed[player] = 1000;
+	if(Helpers.GetDeath(player, 216) == 0)
+	{
+		SetDeaths(player, SetTo, 1, 216);
+		CenterView(loclist[player]+1);
+	}
+}
+function GetItem(player);
+function FollowLocation(player)
+{
+	if(Command(player, AtLeast, 1, '(men)'))
+		MoveLocation(loclist[player]+1, '(men)', player, '20x13');
+}
+function ItemCollect(player)
+{
+	const item = GetItem(player);
+	if(item != 0)
+		RemoveUnitAt(1, item, loclist[player]+1, Computer);
+}
+
+function PlaceBomb(unitEpd)
+{
+	const player = dwbreak(dwread_epd(unitEpd + 0x4C / 4))[[2]];
+	// 대기열 1번이 
+	if(Helpers.GetBuildQueue1(unitEpd) == $U('Zerg Mutalisk'))
+	{
+		if(GetBombNumber(player) > GetCurrentBN(player))
+		{
+			const x, y = Map.GetTileIndex(unitEpd);
+			const x2, y2 = Map.GetTileXY(x, y);
+			Helpers.EUDSetLocation(loc, x2, y2);
+
+			if(Map.GetMapXY(x,y) == 0)
+			{
+				const unitEpd = epdread_epd(EPD(0x628438));
+				CreateUnit(1, UnitID_Bomb, loc +1, player);
+				Bomb.NewBomb(unitEpd);
+				SetMemoryEPD(unitEpd + 0x114/4, SetTo, 10);
+			}
+		}	
+		// 초기화
+		Helpers.ResetBuildQueue(unitEpd);
+	}
+}
+function GetBombRange(player)
+{
+	for(var i = 0; i<12; i++)
+		if(Accumulate(player, Exactly, i, Gas))
+			return i;
+}
+function SetBombRange(player, number)
+{
+	SetResources(player, SetTo, number, Gas);
+}
+function GetCurrentBN(player)
+{
+	for(var i = 0; i<12; i++)
+		if(Command(player, Exactly, i, UnitID_Bomb))
+			return i;
+	
+}
+function GetBombNumber(player)
+{
+	for(var i = 0; i<12; i++)
+		if(Accumulate(player, Exactly, i, Ore))
+			return i;
+}
+function SetBombNumber(player, number)
+{
+	SetResources(player, SetTo, number, Ore);
+}
+
+function GetItem(player)
+{
+	for(var i=0; i<6; i++)
+	{
+		const item = Helpers.ItemList[i];
+		if(Bring(Computer, AtLeast, 1, item, loclist[player]+1))
+		{
+			// Range +
+			if(item == Helpers.Item_rangeUp)
+			{
+				const bombRange = GetBombRange(player);
+				if(bombRange < MaxRange)
+				{
+					DisplayText("\x07[ Range + ]");
+					SetBombRange(player, bombRange+1);
+					return item;
+				}
+				return 0;
+			}
+			// Speed +
+			if(item == Helpers.Item_speedUp)
+			{
+				if(MemoryEPD(GetPlayerEpd(player) + 0x034 /4, AtMost, 1900) || PlayerSpeed[player] > 1900)
+				{
+					DisplayText("\x07[ Speed + ]");
+					SetMemoryEPD(GetPlayerEpd(player) + 0x034 /4, Add, 100);
+					PlayerSpeed[player] = PlayerSpeed[player] + 100;
+					return item;
+				}
+				return 0;
+			}	
+			// Bomb +
+			if(item == Helpers.Item_bombNUp)
+			{
+				const bombNumber = GetBombNumber(player);
+				if(bombNumber < MaxBomb)
+				{
+					DisplayText("\x07[ Bomb + ]");
+					SetBombNumber(player, bombNumber+1);
+					return item;
+				}
+				return 0;
+			}
+			// Range Max
+			if(item == Helpers.Item_rangeMax)
+			{
+				const bombRange = GetBombRange(player);
+				if(bombRange < MaxRange)
+				{
+					DisplayText("\x07[ Range ++ ]");
+					SetBombRange(player, bombRange+2);
+					return item;
+				}
+				return 0;
+			}
+
+			if(item == Helpers.Item_rideTank)
+			{
+				if(Command(player, Exactly, 1, UnitID_Civilian))
+				{
+					PlayerSpeed[player] = dwread_epd(GetPlayerEpd(player) + 0x034 /4);
+					RemoveUnit(UnitID_Civilian, player);
+					SetPlayerEpd(player);
+					const chance = Helpers.GetRandom(0,2);
+					if(chance == 1)
+					{
+						CreateUnit(1, UnitID_Tank, loclist[player]+1, player);
+						SetDeaths(player, SetTo, 1, UnitID_Tank);
+					}
+					else
+					{
+						CreateUnit(1, UnitID_Goliath, loclist[player]+1, player);
+						SetDeaths(player, SetTo, 1, UnitID_Goliath);
+					}
+					
+					return item;
+				}
+				return 0;
+				
+			}
+			if(item == Helpers.Item_rideHide)
+			{
+				if(1)
+				{
+					//const unitEpd = GetPlayerEpd(player);
+					//const statusFlag = dwread_epd(unitEpd + 0x0DC/4);
+					//SetMemoryEPD(unitEpd + 0x0DC/4, SetTo, statusFlag | 0x200);
+					DisplayText("\x07똥을 밟았다.");
+					return item;
+				}
+				return 0;
+				
+			}
+		}
+	}
+}
+
+function OffRide(player)
+{
+	if(Command(player, Exactly, 0, '(men)'))
+	{
+		if(Helpers.GetDeath(player, UnitID_Tank) > 0 || Helpers.GetDeath(player, UnitID_Goliath) > 0)
+		{
+			if(Bomb.boom == 0)
+			{
+				SetPlayerEpd(player);
+				CreateUnit(1, UnitID_Civilian, loclist[player]+1, player);
+				SetMemoryEPD(GetPlayerEpd(player) + 0x034 /4, SetTo, PlayerSpeed[player]);
+				SetDeaths(player, SetTo, 0, UnitID_Tank);
+				SetDeaths(player, SetTo, 0, UnitID_Goliath);
+			}
+		}
+	}
+}
