@@ -47,7 +47,7 @@ function CreateItem(location);
 function Explosion(unitEpd);
 function CreateFire(fireRange, direction, _x, _y);
 function Boom();
-
+function BombWayBlock(unitEpd);
 
 function CheckBomb()
 {//Check bombs' counter at map, Start of explosion. 맵의 모든 폭탄 시간 체크
@@ -62,9 +62,10 @@ function CheckBomb()
 				unitEpd != UnitID_Wall)
 			{
 				if(MemoryEPD(unitEpd + 0x114/4, Exactly, 1))
-				{
+				{//timer is 1(0)
 					Push(unitEpd);
 				}
+				BombWayBlock(unitEpd);
 			}
 		}
 	}
@@ -82,8 +83,31 @@ function CheckBomb()
 	}
 }
 
+function BombWayBlock(unitEpd)
+{
+	if(Player.IsBombWayBlocked(unitEpd) == 0)
+	{// bomb way block
+		const i, j = Map.GetTileIndex(unitEpd);
+		var bool = 0;
+		EUDPlayerLoop()();
+		const player = getcurpl();
+		const px, py = Map.GetTileIndex(Player.GetPlayerEpd(player));
+		if(px == i && py == j)
+		{// player is on bomb
+			bool = 1;
+		}
+		EUDEndPlayerLoop();
+		if(bool == 0)
+		{// no one is on bomb
+			Player.SetBombWayBlock(unitEpd, 1);
+			const x, y = Map.GetTileXY(i, j);
+			Helpers.EUDSetLocation(loc2, x, y);
+			CreateUnit(1, 129, loc2+1, Computer); //way blocker
+		}
+	}
+}
 function Boom()
-{// Compute checked blocks, actually explosion 체크한 블록을 처리함. 실질적인 폭발 
+{// Check explosion blocks, actual explosion 체크한 블록을 처리함. 실질적인 폭발 
 	boom = 1;
 	for(var i=0; i<row; i++)
 	{
@@ -109,6 +133,7 @@ function Boom()
 		}
 	}
 	KillUnit(UnitID_Fire, Computer);
+	RemoveUnit(129, Computer);
 	boom = 0;
 }
 

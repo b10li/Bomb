@@ -36,6 +36,8 @@ const loc_p6 	= $L('p6');
 
 const loclist	= [loc_p1, loc_p2, loc_p3, loc_p4, loc_p5, loc_p6];
 
+function SetBombWayBlock(unitEpd, bool);
+function IsBombWayBlocked(unitEpd);
 function SetRangeAtBomb(unitEpd, range);
 function GetRangeAtBomb(unitEpd);
 function SetBombTimer(unitEpd, time);
@@ -44,6 +46,7 @@ function GetBombNumber(player);
 function GetBombRange(player);
 function SetBombNumber(player, number);
 function SetBombRange(player, number);
+function GetItem(player);
 //--------------------------------------------------------
 
 function SetPlayerEpd(player)
@@ -83,7 +86,6 @@ function InitPlayer(player)
 		CenterView(loclist[player]+1);
 	}
 }
-function GetItem(player);
 function FollowLocation(player)
 {
 	if(Command(player, AtLeast, 1, '(men)'))
@@ -112,10 +114,11 @@ function PlaceBomb(unitEpd)
 			{
 				const unitEpd = epdread_epd(EPD(0x628438));
 				CreateUnit(1, UnitID_Bomb, loc +1, player);
-				Bomb.NewBomb(unitEpd);
+				Bomb.NewBomb(unitEpd);			// Mark at map
+				SetBombWayBlock(unitEpd, 0); 	// no collision on egg
 				SetBombTimer(unitEpd, 10); 		// bomb timer
 				const range = GetBombRange(player);
-				SetRangeAtBomb(unitEpd, range); // Mark bomb range inside bomb
+				SetRangeAtBomb(unitEpd, range); // Mark bomb range inside bom
 			}
 		}	
 		// 초기화
@@ -123,6 +126,18 @@ function PlaceBomb(unitEpd)
 	}
 }
 
+function SetBombWayBlock(unitEpd, bool)
+{//union offset(space for rally & psi)
+	Helpers.SetBuildQueue1(unitEpd, bool);
+}
+function IsBombWayBlocked(unitEpd)
+{//union offset(space for rally & psi)
+	const bool = Helpers.GetBuildQueue1(unitEpd);
+	if(bool == 0)
+		return 0;
+	else 
+		return 1;
+}
 function SetBombTimer(unitEpd, time)
 {
 	SetMemoryEPD(unitEpd + 0x114/4, SetTo, time); 
