@@ -1,3 +1,4 @@
+import Header;
 import Map;
 import Player;
 import Helpers;
@@ -7,18 +8,17 @@ var QIndex, QCount, boom;
 
 const row						= Map.row;
 const col						= Map.col;
+const scale						= Map.scale;
 
-const Computer					= Helpers.Computer;
-const UnitID_Player 			= Helpers.UnitID_Player;
-const UnitID_Bomb				= Helpers.UnitID_Bomb;
-const UnitID_Fire				= Helpers.UnitID_Fire;
-const UnitID_Wall				= Helpers.UnitID_Wall;
-const UnitID_Box				= Helpers.UnitID_Box;
+const Computer					= Header.Computer;
+const UnitID_Player 			= Header.UnitID_Player;
+const UnitID_Bomb				= Header.UnitID_Bomb;
+const UnitID_Fire				= Header.UnitID_Fire;
+const UnitID_Wall				= Header.UnitID_Wall;
+const UnitID_Box				= Header.UnitID_Box;
 
 const loc2 = $L('loc2');
 const loc3 = $L('loc3');
-const scale						= Helpers.scale;
-
 //-------------------------------------------------
 
 function NewBomb(unitEpd)
@@ -45,8 +45,10 @@ function CreateItem(location);
 function Explosion(unitEpd);
 function CreateFire(fireRange, direction, _x, _y);
 function Boom();
+
+
 function CheckBomb()
-{// 폭탄 타이머 체크, 폭발 시작 
+{//Check bombs' counter at map, Start of explosion. 맵의 모든 폭탄 시간 체크
 	for(var i=0; i<row; i++)
 	{
 		for(var j=0; j<col; j++)
@@ -79,7 +81,7 @@ function CheckBomb()
 }
 
 function Boom()
-{// 체크한 블록을 처리함. 실질적인 폭발 
+{// Compute checked blocks, actually explosion 체크한 블록을 처리함. 실질적인 폭발 
 	boom = 1;
 	for(var i=0; i<row; i++)
 	{
@@ -109,9 +111,9 @@ function Boom()
 }
 
 function Explosion(unitEpd)
-{// 폭탄 사거리에 맞게 불 생성
-	const player = dwbreak(dwread_epd(unitEpd + 0x4C / 4))[[2]];
-	const fireRange = Player.GetBombRange(player);
+{// Create fire by its range 폭탄 사거리에 맞게 불 생성
+	const player = Helpers.GetPlayerID(unitEpd);
+	const fireRange = Player.GetRangeAtBomb(unitEpd);
 
 	const x, y = Map.GetTileIndex(unitEpd); // 해당좌표의 unitEpd
 	Map.SetMapXY(x, y, 0);  // 초기화
@@ -129,7 +131,7 @@ function Explosion(unitEpd)
 
 
 function CreateFire(fireRange, direction, _x, _y)
-{// 불생성 지역에, 있는 지형/폭탄 탐지
+{// 불 생성 지역에, 있는 지형/폭탄 탐지
 	Map.SetMapXY(_x, _y, UnitID_Fire);
 	for(var j=1; j<=fireRange; j++)
 	{

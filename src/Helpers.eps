@@ -1,28 +1,3 @@
-// Header -----------------------------
-const Computer					= $P8;
-const UnitID_Player				= [15, 3, 5];
-const UnitID_Bomb				= $U('Zerg Egg');
-const UnitID_Fire				= $U('Zerg Scourge');
-const UnitID_Wall				= 1;	// Terrain
-const UnitID_Box				= 2;	// Breakable
-const DeadBox					= -1;
-
-const scale						= 32;   // tile
-
-const Item_rangeUp				= 128;
-const Item_speedUp				= 215;
-const Item_bombNUp				= 218;
-const Item_rangeMax				= 219;
-const Item_rideTank				= 217;
-const Item_rideHide				= 216;
-
-const ItemList					= [Item_rangeUp, 
-								Item_speedUp, 
-								Item_bombNUp, 
-								Item_rangeMax,
-								Item_rideTank, 
-								Item_rideHide];
-
 // Math --------------------------------
 function GetRandom(low, high) {
 	return (rand() % (high - low)) + low;
@@ -113,4 +88,28 @@ function SetBuildQueue1(unitEpd, unitNumber)
 {
 	//buildQueue[0] = 
 	SetMemoryEPD(unitEpd + 0x98/4, SetTo, unitNumber +14942208);
+}
+
+function GetPlayerID(unitEpd)
+{
+    if(unitEpd != 0)
+        return dwbreak(dwread_epd(unitEpd + (0x4C / 4)))[[2]];
+    else 
+        return 0;
+}
+
+function GetUnitXY(unitEpd)
+{
+    if(unitEpd != 0)
+        return dwbreak(dwread_epd(unitEpd + (0x28 / 4)))[[0,1]];
+    else
+        return 0, 0;
+}
+
+function GetUnitType(unitEpd)
+{
+    if(unitEpd != 0)
+        return dwbreak(dwread_epd(unitEpd + (0x64 / 4)))[[3]];
+    else
+        return 0;
 }

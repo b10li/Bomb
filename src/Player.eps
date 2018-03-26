@@ -1,14 +1,17 @@
+import Header;
 import Helpers;
 import Map;
 import Bomb;
 
-const scale						= Helpers.scale;
-const Computer		 			= Helpers.Computer;
-const UnitID_Civilian 			= Helpers.UnitID_Player[0];
-const UnitID_Tank 				= Helpers.UnitID_Player[2];
-const UnitID_Goliath 			= Helpers.UnitID_Player[1];
-const UnitID_Bomb				= Helpers.UnitID_Bomb;
-const UnitID_Fire				= Helpers.UnitID_Fire;
+const scale						= Map.scale;
+
+const Computer		 			= Header.Computer;
+const UnitID_Civilian 			= Header.UnitID_Player[0];
+const UnitID_Tank 				= Header.UnitID_Player[2];
+const UnitID_Goliath 			= Header.UnitID_Player[1];
+const UnitID_Bomb				= Header.UnitID_Bomb;
+const UnitID_Fire				= Header.UnitID_Fire;
+
 const EPD_Players	 			= EUDArray(6);	
 const MaxRange					= 5;
 const MaxBomb					= 8;
@@ -25,6 +28,14 @@ const loc_p6 	= $L('p6');
 
 const loclist	= [loc_p1, loc_p2, loc_p3, loc_p4, loc_p5, loc_p6];
 
+function SetRangeAtBomb(unitEpd, range);
+function GetRangeAtBomb(unitEpd);
+function SetBombTimer(unitEpd, time);
+function GetCurrentBN(player);
+function GetBombNumber(player);
+function GetBombRange(player);
+function SetBombNumber(player, number);
+function SetBombRange(player, number);
 //--------------------------------------------------------
 
 function SetPlayerEpd(player)
@@ -37,11 +48,6 @@ function GetPlayerEpd(player)
 	return EPD_Players[player];
 }
 
-function GetCurrentBN(player);
-function GetBombNumber(player);
-function GetBombRange(player);
-function SetBombNumber(player, number);
-function SetBombRange(player, number);
 function InitPlayer(player)
 {
 	SetPlayerEpd(player);
@@ -70,7 +76,7 @@ function ItemCollect(player)
 
 function PlaceBomb(unitEpd)
 {
-	const player = dwbreak(dwread_epd(unitEpd + 0x4C / 4))[[2]];
+	const player = Helpers.GetPlayerID(unitEpd);
 	// 대기열 1번이 
 	if(Helpers.GetBuildQueue1(unitEpd) == $U('Zerg Mutalisk'))
 	{
@@ -85,12 +91,19 @@ function PlaceBomb(unitEpd)
 				const unitEpd = epdread_epd(EPD(0x628438));
 				CreateUnit(1, UnitID_Bomb, loc +1, player);
 				Bomb.NewBomb(unitEpd);
-				SetMemoryEPD(unitEpd + 0x114/4, SetTo, 10);
+				SetBombTimer(unitEpd, 10); 		// bomb timer
+				const range = GetBombRange(player);
+				SetRangeAtBomb(unitEpd, range); // Mark bomb range inside bomb
 			}
 		}	
 		// 초기화
 		Helpers.ResetBuildQueue(unitEpd);
 	}
+}
+
+function SetBombTimer(unitEpd, time)
+{
+	SetMemoryEPD(unitEpd + 0x114/4, SetTo, time); 
 }
 function GetBombRange(player)
 {
@@ -118,6 +131,16 @@ function GetBombNumber(player)
 function SetBombNumber(player, number)
 {
 	SetResources(player, SetTo, number, Ore);
+}
+
+function GetRangeAtBomb(unitEpd)
+{
+	return dwread_epd(unitEpd + 0xFC/4);
+}
+
+function SetRangeAtBomb(unitEpd, range)
+{//union offset(space for rally & psi)
+	dwwrite_epd(unitEpd + 0xFC/4, range);
 }
 
 function GetItem(player)
