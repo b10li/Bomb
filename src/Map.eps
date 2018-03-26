@@ -6,6 +6,7 @@ const row						= 20;
 const col						= 13;
 const Map						= EUDArray(row*col);
 const scale						= 32;
+const Computer					= Header.Computer;
 
 const fillLoc 					= $L('draw');
 const x_offset 					= 0;	// tile index ex) [x][y]
@@ -50,7 +51,7 @@ function InitMap()
 function Mapper()
 {
 	const Map0 = [
-//  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 6 7 8 9 0
+//  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9
 	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, //0
 	1,0,0,2,2,2,2,2,0,0,0,0,2,2,2,2,2,0,0,1, //1
 	1,0,1,2,1,2,1,2,1,0,0,1,2,1,2,1,2,1,0,1, //2
@@ -97,5 +98,11 @@ function fill(x, y, style) {
 	if(style == -1) return;
 	const x2, y2 = GetTileXY(x, y);
 	Helpers.EUDSetLocation(fillLoc, x2, y2);
-	CreateUnit(1, style, fillLoc + 1, Helpers.Computer);
+	CreateUnit(1, style, fillLoc + 1, Computer);
+}
+
+function ClearMap()
+{
+	RemoveUnit('(any unit)', Computer);
+	RemoveUnit('(any unit)', $Force1);
 }

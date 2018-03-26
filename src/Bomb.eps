@@ -16,6 +16,8 @@ const UnitID_Bomb				= Header.UnitID_Bomb;
 const UnitID_Fire				= Header.UnitID_Fire;
 const UnitID_Wall				= Header.UnitID_Wall;
 const UnitID_Box				= Header.UnitID_Box;
+const DeadBox					= Header.DeadBox;
+const ItemList					= Header.ItemList;
 
 const loc2 = $L('loc2');
 const loc3 = $L('loc3');
@@ -96,7 +98,7 @@ function Boom()
 				RemoveUnitAt(All, '(any unit)', loc2+1, Computer);
 				CreateUnit(1, UnitID_Fire, loc2+1, Computer);
 			}
-			if(Map.GetMapXY(i, j) == Helpers.DeadBox)
+			if(Map.GetMapXY(i, j) == DeadBox)
 			{
 				Map.SetMapXY(i, j, 0);
 				const x, y = Map.GetTileXY(i, j);
@@ -166,10 +168,10 @@ function CreateFire(fireRange, direction, _x, _y)
 			Map.SetMapXY(x, y, UnitID_Fire);	
 		else if (Map.GetMapXY(x, y) == UnitID_Box) 		// Breakable
 		{
-			Map.SetMapXY(x, y, Helpers.DeadBox);
+			Map.SetMapXY(x, y, DeadBox);
 			return;
 		}
-		else if (Map.GetMapXY(x, y) == Helpers.DeadBox) return;
+		else if (Map.GetMapXY(x, y) == DeadBox) return;
 		else 											// bomb (unitEpd)
 		{
 			const unitEpd = Map.GetMapXY(x, y);
@@ -183,6 +185,6 @@ function CreateItem(location)
 	if(Helpers.GetRandom(0,2))// 0~1
 	{
 		const randNum = Helpers.GetRandom(0, 9)%6; //0~8 -> 0~5
-		CreateUnit(1, Helpers.ItemList[randNum], location +1, Computer);
+		CreateUnit(1, ItemList[randNum], location +1, Computer);
 	}
 }

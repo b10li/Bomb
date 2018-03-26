@@ -12,6 +12,14 @@ const UnitID_Goliath 			= Header.UnitID_Player[1];
 const UnitID_Bomb				= Header.UnitID_Bomb;
 const UnitID_Fire				= Header.UnitID_Fire;
 
+const ItemList					= Header.ItemList;
+const Item_rangeUp				= Header.Item_rangeUp;
+const Item_speedUp				= Header.Item_speedUp;
+const Item_bombNUp				= Header.Item_bombNUp;
+const Item_rangeMax				= Header.Item_rangeMax;
+const Item_rideTank				= Header.Item_rideTank;
+const Item_rideHide				= Header.Item_rideHide;
+
 const EPD_Players	 			= EUDArray(6);	
 const MaxRange					= 5;
 const MaxBomb					= 8;
@@ -48,9 +56,23 @@ function GetPlayerEpd(player)
 	return EPD_Players[player];
 }
 
+function InitPlayerLocation(player)
+{
+	var x, y;
+	if(player == 0) { x=1; y=1; }
+	if(player == 1) { x=18; y=1; }
+	if(player == 2) { x=1; y=11; }
+	if(player == 3) { x=18; y=11; }
+	if(player == 4) { x=1; y=6; }
+	if(player == 5) { x=18; y=6; }
+
+	const x2, y2 = Map.GetTileXY(x, y);
+	Helpers.EUDSetLocation(loclist[player], x2, y2);
+}
 function InitPlayer(player)
 {
 	SetPlayerEpd(player);
+	InitPlayerLocation(player);
 	CreateUnit(1, UnitID_Civilian, loclist[player]+1, player);
 	SetBombNumber(player, 1);
 	SetBombRange(player, 1);
@@ -147,11 +169,11 @@ function GetItem(player)
 {
 	for(var i=0; i<6; i++)
 	{
-		const item = Helpers.ItemList[i];
+		const item = ItemList[i];
 		if(Bring(Computer, AtLeast, 1, item, loclist[player]+1))
 		{
 			// Range +
-			if(item == Helpers.Item_rangeUp)
+			if(item == Item_rangeUp)
 			{
 				const bombRange = GetBombRange(player);
 				if(bombRange < MaxRange)
@@ -163,7 +185,7 @@ function GetItem(player)
 				return 0;
 			}
 			// Speed +
-			if(item == Helpers.Item_speedUp)
+			if(item == Item_speedUp)
 			{
 				if(MemoryEPD(GetPlayerEpd(player) + 0x034 /4, AtMost, 1900) || PlayerSpeed[player] > 1900)
 				{
@@ -175,7 +197,7 @@ function GetItem(player)
 				return 0;
 			}	
 			// Bomb +
-			if(item == Helpers.Item_bombNUp)
+			if(item == Item_bombNUp)
 			{
 				const bombNumber = GetBombNumber(player);
 				if(bombNumber < MaxBomb)
@@ -187,7 +209,7 @@ function GetItem(player)
 				return 0;
 			}
 			// Range Max
-			if(item == Helpers.Item_rangeMax)
+			if(item == Item_rangeMax)
 			{
 				const bombRange = GetBombRange(player);
 				if(bombRange < MaxRange)
@@ -199,7 +221,7 @@ function GetItem(player)
 				return 0;
 			}
 
-			if(item == Helpers.Item_rideTank)
+			if(item == Item_rideTank)
 			{
 				if(Command(player, Exactly, 1, UnitID_Civilian))
 				{
@@ -222,7 +244,7 @@ function GetItem(player)
 				return 0;
 
 			}
-			if(item == Helpers.Item_rideHide)
+			if(item == Item_rideHide)
 			{
 				if(1)
 				{

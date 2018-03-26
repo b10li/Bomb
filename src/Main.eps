@@ -1,11 +1,52 @@
-
 import Player;
 import Bomb;
 import Map;
 
+var GameState;
+
 function onPluginStart()
 {
 	randomize();
+	LeaderBoardComputerPlayers(Disable);
+	LeaderBoardScore(Custom, "/2");
+}
+function RoundStart();
+function RoundEnd();
+function DisplayTextToAllPlayers(number);
+function GameEnd(player);
+function beforeTriggerExec() 
+{
+	if(GameState == 0)
+	{
+		RoundStart();
+	}
+
+	if(GameState == 1)
+	{
+		Bomb.CheckBomb();
+		EUDPlayerLoop()();
+		var player = getcurpl();
+		if(player < 6)
+		{
+			Player.PlaceBomb(Player.GetPlayerEpd(player));
+			Player.FollowLocation(player);
+			Player.ItemCollect(player);
+			Player.OffRide(player);
+		}
+		EUDEndPlayerLoop();
+		RoundEnd();
+	}
+
+}
+
+function afterTriggerExec() 
+{
+	// eudturbo
+	SetMemory(0x6509A0, SetTo, 0);  
+}
+function RoundStart()
+{
+	Map.ClearMap();
 	Map.GetMap();
 	Map.Render();
 	
@@ -14,40 +55,16 @@ function onPluginStart()
 	if(player < 6) //P1~P6
 		Player.InitPlayer(player);
 	EUDEndPlayerLoop();
-	
+	GameState = 1; // <------------------
 }
 
-function GameEnd();
-function beforeTriggerExec() 
+function RoundEnd()
 {
-	
-	Bomb.CheckBomb();
-	EUDPlayerLoop()();
-	var player = getcurpl();
-	if(player < 6)
-	{
-		Player.PlaceBomb(Player.GetPlayerEpd(player));
-		Player.FollowLocation(player);
-		Player.ItemCollect(player);
-		Player.OffRide(player);
-	}
-	EUDEndPlayerLoop();
 
-	GameEnd();
-}
-
-function afterTriggerExec() 
-{
-	// eudturbo
-	SetMemory(0x6509A0, SetTo, 0);  
-}
-
-function GameEnd()
-{
 	if(Command($Force1, AtMost, 1, '(men)') && 
 		Command(7, Exactly, 0, 15) &&
 		Accumulate($Force1, AtLeast, 1, OreAndGas))
-	{
+	{//Time Counter
 		SetDeaths(7, Add, 1, 200);
 	}
 	if(Deaths(7, AtLeast, 24, 200))
@@ -55,11 +72,44 @@ function GameEnd()
 		if(Command($Force1, AtMost, 1, '(men)'))
 		{
 			EUDPlayerLoop()();
-			DisplayText("\r\n\r\n\r\n\r\n\r\n\x13니가 이겼다\r\n\r\n\r\n\r\n\r\n");
-			Victory();
+			const player = getcurpl();
+			if(Command(player, Exactly, 1, '(men)'))
+			{
+				SetScore(player, Add, 1, Custom);	// win score
+				DisplayTextToAllPlayers(player);
+			}
+			GameEnd(player);
 			EUDEndPlayerLoop();
+			GameState = 0; // <------------------
+			SetDeaths(7, SetTo, 0, 200);
+			LeaderBoardScore(Custom, "/2");
 		}
 		else
 			SetDeaths(7, SetTo, 0, 200);
 	}
+
+}
+
+function GameEnd(player)
+{
+	for(var i=0; i<6; i++)
+	{
+		if (Score(i, Custom, Exactly, 2))
+		{
+			DisplayTextToAllPlayers(i);
+			Victory();
+		}
+	}
+}
+
+function DisplayTextToAllPlayers(number)
+{
+	EUDPlayerLoop()();
+	if(number == 0) DisplayText("\r\n\r\n\r\n\r\n\r\n\x13빨강이 이겼다\r\n\r\n\r\n\r\n\r\n");
+	else if(number == 1) DisplayText("\r\n\r\n\r\n\r\n\r\n\x13파랑이 이겼다\r\n\r\n\r\n\r\n\r\n");
+	else if(number == 2) DisplayText("\r\n\r\n\r\n\r\n\r\n\x13연두가 이겼다\r\n\r\n\r\n\r\n\r\n");
+	else if(number == 3) DisplayText("\r\n\r\n\r\n\r\n\r\n\x13보라가 이겼다\r\n\r\n\r\n\r\n\r\n");
+	else if(number == 4) DisplayText("\r\n\r\n\r\n\r\n\r\n\x13주황이 이겼다\r\n\r\n\r\n\r\n\r\n");
+	else if(number == 5) DisplayText("\r\n\r\n\r\n\r\n\r\n\x13똥색이 이겼다\r\n\r\n\r\n\r\n\r\n");
+	EUDEndPlayerLoop();
 }
