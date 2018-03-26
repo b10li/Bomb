@@ -35,6 +35,7 @@ const loc_p5 	= $L('p5');
 const loc_p6 	= $L('p6');
 
 const loclist	= [loc_p1, loc_p2, loc_p3, loc_p4, loc_p5, loc_p6];
+const locBC		= $L('BC');
 
 function SetBombWayBlock(unitEpd, bool);
 function IsBombWayBlocked(unitEpd);
@@ -113,9 +114,10 @@ function PlaceBomb(unitEpd)
 			if(Map.GetMapXY(x,y) == 0)
 			{
 				const unitEpd = epdread_epd(EPD(0x628438));
-				CreateUnit(1, UnitID_Bomb, loc +1, player);
+				CreateUnit(1, UnitID_Bomb, locBC +1, player);
+				SetBombWayBlock(unitEpd, 0); 	// no collision on bomb
+				MoveUnit(1, UnitID_Bomb, player, locBC +1, loc+1);
 				Bomb.NewBomb(unitEpd);			// Mark at map
-				SetBombWayBlock(unitEpd, 0); 	// no collision on egg
 				SetBombTimer(unitEpd, 10); 		// bomb timer
 				const range = GetBombRange(player);
 				SetRangeAtBomb(unitEpd, range); // Mark bomb range inside bom
@@ -127,13 +129,20 @@ function PlaceBomb(unitEpd)
 }
 
 function SetBombWayBlock(unitEpd, bool)
-{//union offset(space for rally & psi)
-	Helpers.SetBuildQueue1(unitEpd, bool);
+{
+	const noCollisionFlag = 0xA00000;
+	const unitFlag = dwread_epd(unitEpd + 0x0DC/4);
+	if(bool == 0)
+		SetMemoryEPD(unitEpd + 0x0DC/4, SetTo, unitFlag | noCollisionFlag);
+	else if (unitFlag == (unitFlag | noCollisionFlag))
+		SetMemoryEPD(unitEpd + 0x0DC/4, Subtract, noCollisionFlag);
+
 }
 function IsBombWayBlocked(unitEpd)
-{//union offset(space for rally & psi)
-	const bool = Helpers.GetBuildQueue1(unitEpd);
-	if(bool == 0)
+{
+	const noCollisionFlag = 0xA00000;
+	const unitFlag = dwread_epd(unitEpd + 0x0DC/4);
+	if(unitFlag == (unitFlag | noCollisionFlag))
 		return 0;
 	else 
 		return 1;

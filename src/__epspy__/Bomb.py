@@ -309,234 +309,228 @@ def BombWayBlock(unitEpd):
             # (Line 101) {// no one is on bomb
             # (Line 102) Player.SetBombWayBlock(unitEpd, 1);
             Player.SetBombWayBlock(unitEpd, 1)
-            # (Line 103) const x, y = Map.GetTileXY(i, j);
-            x, y = List2Assignable([Map.GetTileXY(i, j)])
-            # (Line 104) Helpers.EUDSetLocation(loc2, x, y);
-            Helpers.EUDSetLocation(loc2, x, y)
-            # (Line 105) CreateUnit(1, 129, loc2+1, Computer); //way blocker
-            DoActions(CreateUnit(1, 129, loc2 + 1, Computer))
-            # (Line 106) }
-            # (Line 107) }
+            # (Line 103) }
+            # (Line 104) }
         EUDEndIf()
-        # (Line 108) }
+        # (Line 105) }
     EUDEndIf()
-    # (Line 109) function Boom()
+    # (Line 106) function Boom()
 
-# (Line 110) {// Check explosion blocks, actual explosion 체크한 블록을 처리함. 실질적인 폭발
+# (Line 107) {// Check explosion blocks, actual explosion 체크한 블록을 처리함. 실질적인 폭발
 @EUDFunc
 def Boom():
-    # (Line 111) boom = 1;
+    # (Line 108) boom = 1;
     boom << (1)
-    # (Line 112) for(var i=0; i<row; i++)
+    # (Line 109) for(var i=0; i<row; i++)
     i = EUDVariable()
     i << (0)
     if EUDWhile()(i >= row, neg=True):
         def _t2():
             i.__iadd__(1)
-        # (Line 113) {
-        # (Line 114) for(var j=0; j<col; j++)
+        # (Line 110) {
+        # (Line 111) for(var j=0; j<col; j++)
         j = EUDVariable()
         j << (0)
         if EUDWhile()(j >= col, neg=True):
             def _t4():
                 j.__iadd__(1)
-            # (Line 115) {
-            # (Line 116) if(Map.GetMapXY(i, j) == UnitID_Fire)
+            # (Line 112) {
+            # (Line 113) if(Map.GetMapXY(i, j) == UnitID_Fire)
             if EUDIf()(Map.GetMapXY(i, j) == UnitID_Fire):
-                # (Line 117) {
-                # (Line 118) Map.SetMapXY(i, j, 0);
+                # (Line 114) {
+                # (Line 115) Map.SetMapXY(i, j, 0);
                 Map.SetMapXY(i, j, 0)
-                # (Line 119) const x, y = Map.GetTileXY(i, j);
+                # (Line 116) const x, y = Map.GetTileXY(i, j);
                 x, y = List2Assignable([Map.GetTileXY(i, j)])
-                # (Line 120) Helpers.EUDSetLocation(loc2, x, y);
+                # (Line 117) Helpers.EUDSetLocation(loc2, x, y);
                 Helpers.EUDSetLocation(loc2, x, y)
-                # (Line 121) KillUnitAt(All, '(men)', loc2+1, $Force1);
+                # (Line 118) KillUnitAt(All, '(men)', loc2+1, $Force1);
                 DoActions(KillUnitAt(All, '(men)', loc2 + 1, 18))
-                # (Line 122) RemoveUnitAt(All, '(any unit)', loc2+1, Computer);
+                # (Line 119) RemoveUnitAt(All, '(any unit)', loc2+1, Computer);
                 DoActions(RemoveUnitAt(All, '(any unit)', loc2 + 1, Computer))
-                # (Line 123) CreateUnit(1, UnitID_Fire, loc2+1, Computer);
+                # (Line 120) CreateUnit(1, UnitID_Fire, loc2+1, Computer);
                 DoActions(CreateUnit(1, UnitID_Fire, loc2 + 1, Computer))
-                # (Line 124) }
-                # (Line 125) if(Map.GetMapXY(i, j) == DeadBox)
+                # (Line 121) }
+                # (Line 122) if(Map.GetMapXY(i, j) == DeadBox)
             EUDEndIf()
             if EUDIf()(Map.GetMapXY(i, j) == DeadBox):
-                # (Line 126) {
-                # (Line 127) Map.SetMapXY(i, j, 0);
+                # (Line 123) {
+                # (Line 124) Map.SetMapXY(i, j, 0);
                 Map.SetMapXY(i, j, 0)
-                # (Line 128) const x, y = Map.GetTileXY(i, j);
+                # (Line 125) const x, y = Map.GetTileXY(i, j);
                 x, y = List2Assignable([Map.GetTileXY(i, j)])
-                # (Line 129) Helpers.EUDSetLocation(loc2, x, y);
+                # (Line 126) Helpers.EUDSetLocation(loc2, x, y);
                 Helpers.EUDSetLocation(loc2, x, y)
-                # (Line 130) RemoveUnitAt(All, '(men)', loc2+1, Computer);
+                # (Line 127) RemoveUnitAt(All, '(men)', loc2+1, Computer);
                 DoActions(RemoveUnitAt(All, '(men)', loc2 + 1, Computer))
-                # (Line 131) CreateItem(loc2);
+                # (Line 128) CreateItem(loc2);
                 CreateItem(loc2)
-                # (Line 132) }
-                # (Line 133) }
+                # (Line 129) }
+                # (Line 130) }
             EUDEndIf()
-            # (Line 134) }
+            # (Line 131) }
             EUDSetContinuePoint()
             _t4()
         EUDEndWhile()
-        # (Line 135) KillUnit(UnitID_Fire, Computer);
+        # (Line 132) KillUnit(UnitID_Fire, Computer);
         EUDSetContinuePoint()
         _t2()
     EUDEndWhile()
     DoActions(KillUnit(UnitID_Fire, Computer))
-    # (Line 136) RemoveUnit(129, Computer);
+    # (Line 133) RemoveUnit(129, Computer);
     DoActions(RemoveUnit(129, Computer))
-    # (Line 137) boom = 0;
+    # (Line 134) boom = 0;
     boom << (0)
-    # (Line 138) }
-    # (Line 140) function Explosion(unitEpd)
+    # (Line 135) }
+    # (Line 137) function Explosion(unitEpd)
 
-# (Line 141) {// Create fire by its range 폭탄 사거리에 맞게 불 생성
+# (Line 138) {// Create fire by its range 폭탄 사거리에 맞게 불 생성
 @EUDFunc
 def Explosion(unitEpd):
-    # (Line 142) const player = Helpers.GetPlayerID(unitEpd);
+    # (Line 139) const player = Helpers.GetPlayerID(unitEpd);
     player = Helpers.GetPlayerID(unitEpd)
-    # (Line 143) const fireRange = Player.GetRangeAtBomb(unitEpd);
+    # (Line 140) const fireRange = Player.GetRangeAtBomb(unitEpd);
     fireRange = Player.GetRangeAtBomb(unitEpd)
-    # (Line 145) const x, y = Map.GetTileIndex(unitEpd); // 해당좌표의 unitEpd
+    # (Line 142) const x, y = Map.GetTileIndex(unitEpd); // 해당좌표의 unitEpd
     x, y = List2Assignable([Map.GetTileIndex(unitEpd)])
-    # (Line 146) Map.SetMapXY(x, y, 0);  // 초기화
+    # (Line 143) Map.SetMapXY(x, y, 0);  // 초기화
     Map.SetMapXY(x, y, 0)
-    # (Line 148) const x2, y2 = Map.GetTileXY(x, y);
+    # (Line 145) const x2, y2 = Map.GetTileXY(x, y);
     x2, y2 = List2Assignable([Map.GetTileXY(x, y)])
-    # (Line 149) Helpers.EUDSetLocation(loc2, x2, y2);
+    # (Line 146) Helpers.EUDSetLocation(loc2, x2, y2);
     Helpers.EUDSetLocation(loc2, x2, y2)
-    # (Line 150) RemoveUnitAt(1, UnitID_Bomb, loc2+1, player);
+    # (Line 147) RemoveUnitAt(1, UnitID_Bomb, loc2+1, player);
     DoActions(RemoveUnitAt(1, UnitID_Bomb, loc2 + 1, player))
-    # (Line 152) for(var i=0; i<4; i++)
+    # (Line 149) for(var i=0; i<4; i++)
     i = EUDVariable()
     i << (0)
     if EUDWhile()(i >= 4, neg=True):
         def _t2():
             i.__iadd__(1)
-        # (Line 153) {
-        # (Line 154) CreateFire(fireRange, i, x, y);
+        # (Line 150) {
+        # (Line 151) CreateFire(fireRange, i, x, y);
         CreateFire(fireRange, i, x, y)
-        # (Line 155) }
-        # (Line 156) }
+        # (Line 152) }
+        # (Line 153) }
         EUDSetContinuePoint()
         _t2()
     EUDEndWhile()
-    # (Line 160) function CreateFire(fireRange, direction, _x, _y)
+    # (Line 157) function CreateFire(fireRange, direction, _x, _y)
 
-# (Line 161) {// 불 생성 지역에, 있는 지형/폭탄 탐지
+# (Line 158) {// 불 생성 지역에, 있는 지형/폭탄 탐지
 @EUDFunc
 def CreateFire(fireRange, direction, _x, _y):
-    # (Line 162) Map.SetMapXY(_x, _y, UnitID_Fire);
+    # (Line 159) Map.SetMapXY(_x, _y, UnitID_Fire);
     Map.SetMapXY(_x, _y, UnitID_Fire)
-    # (Line 163) for(var j=1; j<=fireRange; j++)
+    # (Line 160) for(var j=1; j<=fireRange; j++)
     j = EUDVariable()
     j << (1)
     if EUDWhile()(j <= fireRange):
         def _t2():
             j.__iadd__(1)
-        # (Line 164) {
-        # (Line 165) var x = _x;
+        # (Line 161) {
+        # (Line 162) var x = _x;
         x = EUDVariable()
         x << (_x)
-        # (Line 166) var y = _y;
+        # (Line 163) var y = _y;
         y = EUDVariable()
         y << (_y)
-        # (Line 168) if(direction == 0)
+        # (Line 165) if(direction == 0)
         if EUDIf()(direction == 0):
-            # (Line 169) {
-            # (Line 170) if(x < j) x = 0;
+            # (Line 166) {
+            # (Line 167) if(x < j) x = 0;
             if EUDIf()(x >= j, neg=True):
                 x << (0)
-                # (Line 171) else x = x - j;
+                # (Line 168) else x = x - j;
             if EUDElse()():
                 x << (x - j)
-                # (Line 172) }
+                # (Line 169) }
             EUDEndIf()
-            # (Line 173) if(direction == 1)
+            # (Line 170) if(direction == 1)
         EUDEndIf()
         if EUDIf()(direction == 1):
-            # (Line 174) {
-            # (Line 175) if(y < j) y = 0;
+            # (Line 171) {
+            # (Line 172) if(y < j) y = 0;
             if EUDIf()(y >= j, neg=True):
                 y << (0)
-                # (Line 176) else y = y - j;
+                # (Line 173) else y = y - j;
             if EUDElse()():
                 y << (y - j)
-                # (Line 177) }
+                # (Line 174) }
             EUDEndIf()
-            # (Line 178) if(direction == 2)
+            # (Line 175) if(direction == 2)
         EUDEndIf()
         if EUDIf()(direction == 2):
-            # (Line 179) {
-            # (Line 180) if(x + j > row) x = row;
+            # (Line 176) {
+            # (Line 177) if(x + j > row) x = row;
             if EUDIf()(x + j <= row, neg=True):
                 x << (row)
-                # (Line 181) else x = x + j;
+                # (Line 178) else x = x + j;
             if EUDElse()():
                 x << (x + j)
-                # (Line 182) }
+                # (Line 179) }
             EUDEndIf()
-            # (Line 183) if(direction == 3)
+            # (Line 180) if(direction == 3)
         EUDEndIf()
         if EUDIf()(direction == 3):
-            # (Line 184) {
-            # (Line 185) if(y + j > col) y = col;
+            # (Line 181) {
+            # (Line 182) if(y + j > col) y = col;
             if EUDIf()(y + j <= col, neg=True):
                 y << (col)
-                # (Line 186) else y = y + j;
+                # (Line 183) else y = y + j;
             if EUDElse()():
                 y << (y + j)
-                # (Line 187) }
+                # (Line 184) }
             EUDEndIf()
-            # (Line 189) if (Map.GetMapXY(x, y) == UnitID_Wall) return;	// Imapssible
+            # (Line 186) if (Map.GetMapXY(x, y) == UnitID_Wall) return;	// Imapssible
         EUDEndIf()
         if EUDIf()(Map.GetMapXY(x, y) == UnitID_Wall):
             EUDReturn()
-            # (Line 190) else if (Map.GetMapXY(x, y) == UnitID_Fire) 	// Fire
+            # (Line 187) else if (Map.GetMapXY(x, y) == UnitID_Fire) 	// Fire
         if EUDElseIf()(Map.GetMapXY(x, y) == UnitID_Fire):
-            # (Line 191) Map.SetMapXY(x, y, UnitID_Fire);
+            # (Line 188) Map.SetMapXY(x, y, UnitID_Fire);
             Map.SetMapXY(x, y, UnitID_Fire)
-            # (Line 192) else if (Map.GetMapXY(x, y) == 0) 				// Empty
+            # (Line 189) else if (Map.GetMapXY(x, y) == 0) 				// Empty
         if EUDElseIf()(Map.GetMapXY(x, y) == 0):
-            # (Line 193) Map.SetMapXY(x, y, UnitID_Fire);
+            # (Line 190) Map.SetMapXY(x, y, UnitID_Fire);
             Map.SetMapXY(x, y, UnitID_Fire)
-            # (Line 194) else if (Map.GetMapXY(x, y) == UnitID_Box) 		// Breakable
+            # (Line 191) else if (Map.GetMapXY(x, y) == UnitID_Box) 		// Breakable
         if EUDElseIf()(Map.GetMapXY(x, y) == UnitID_Box):
-            # (Line 195) {
-            # (Line 196) Map.SetMapXY(x, y, DeadBox);
+            # (Line 192) {
+            # (Line 193) Map.SetMapXY(x, y, DeadBox);
             Map.SetMapXY(x, y, DeadBox)
-            # (Line 197) return;
+            # (Line 194) return;
             EUDReturn()
-            # (Line 198) }
-            # (Line 199) else if (Map.GetMapXY(x, y) == DeadBox) return;
+            # (Line 195) }
+            # (Line 196) else if (Map.GetMapXY(x, y) == DeadBox) return;
         if EUDElseIf()(Map.GetMapXY(x, y) == DeadBox):
             EUDReturn()
-            # (Line 200) else 											// bomb (unitEpd)
-            # (Line 201) {
+            # (Line 197) else 											// bomb (unitEpd)
+            # (Line 198) {
         if EUDElse()():
-            # (Line 202) const unitEpd = Map.GetMapXY(x, y);
+            # (Line 199) const unitEpd = Map.GetMapXY(x, y);
             unitEpd = Map.GetMapXY(x, y)
-            # (Line 203) Push(unitEpd);
+            # (Line 200) Push(unitEpd);
             Push(unitEpd)
-            # (Line 204) }
-            # (Line 205) }
+            # (Line 201) }
+            # (Line 202) }
         EUDEndIf()
-        # (Line 206) }
+        # (Line 203) }
         EUDSetContinuePoint()
         _t2()
     EUDEndWhile()
-    # (Line 208) function CreateItem(location)
+    # (Line 205) function CreateItem(location)
 
-# (Line 209) {
+# (Line 206) {
 @EUDFunc
 def CreateItem(location):
-    # (Line 210) if(Helpers.GetRandom(0,2))// 0~1
+    # (Line 207) if(Helpers.GetRandom(0,2))// 0~1
     if EUDIf()(Helpers.GetRandom(0, 2)):
-        # (Line 211) {
-        # (Line 212) const randNum = Helpers.GetRandom(0, 9)%6; //0~8 -> 0~5
+        # (Line 208) {
+        # (Line 209) const randNum = Helpers.GetRandom(0, 9)%6; //0~8 -> 0~5
         randNum = Helpers.GetRandom(0, 9) % 6
-        # (Line 213) CreateUnit(1, ItemList[randNum], location +1, Computer);
+        # (Line 210) CreateUnit(1, ItemList[randNum], location +1, Computer);
         DoActions(CreateUnit(1, ItemList[randNum], location + 1, Computer))
-        # (Line 214) }
-        # (Line 215) }
+        # (Line 211) }
+        # (Line 212) }
     EUDEndIf()

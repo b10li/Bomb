@@ -182,482 +182,499 @@ loc_p5 = _CGFW(lambda: [GetLocationIndex('p5')], 1)[0]
 loc_p6 = _CGFW(lambda: [GetLocationIndex('p6')], 1)[0]
 # (Line 37) const loclist	= [loc_p1, loc_p2, loc_p3, loc_p4, loc_p5, loc_p6];
 loclist = _CGFW(lambda: [_ARR(FlattenList([loc_p1, loc_p2, loc_p3, loc_p4, loc_p5, loc_p6]))], 1)[0]
-# (Line 39) function SetBombWayBlock(unitEpd, bool);
-# (Line 40) function IsBombWayBlocked(unitEpd);
-# (Line 41) function SetRangeAtBomb(unitEpd, range);
-# (Line 42) function GetRangeAtBomb(unitEpd);
-# (Line 43) function SetBombTimer(unitEpd, time);
-# (Line 44) function GetCurrentBN(player);
-# (Line 45) function GetBombNumber(player);
-# (Line 46) function GetBombRange(player);
-# (Line 47) function SetBombNumber(player, number);
-# (Line 48) function SetBombRange(player, number);
-# (Line 49) function GetItem(player);
-# (Line 52) function SetPlayerEpd(player)
-# (Line 53) {
+# (Line 38) const locBC		= $L('BC');
+locBC = _CGFW(lambda: [GetLocationIndex('BC')], 1)[0]
+# (Line 40) function SetBombWayBlock(unitEpd, bool);
+# (Line 41) function IsBombWayBlocked(unitEpd);
+# (Line 42) function SetRangeAtBomb(unitEpd, range);
+# (Line 43) function GetRangeAtBomb(unitEpd);
+# (Line 44) function SetBombTimer(unitEpd, time);
+# (Line 45) function GetCurrentBN(player);
+# (Line 46) function GetBombNumber(player);
+# (Line 47) function GetBombRange(player);
+# (Line 48) function SetBombNumber(player, number);
+# (Line 49) function SetBombRange(player, number);
+# (Line 50) function GetItem(player);
+# (Line 53) function SetPlayerEpd(player)
+# (Line 54) {
 @EUDFunc
 def SetPlayerEpd(player):
-    # (Line 54) EPD_Players[player] = epdread_epd(EPD(0x628438));
+    # (Line 55) EPD_Players[player] = epdread_epd(EPD(0x628438));
     _ARRW(EPD_Players, player) << (f_epdread_epd(EPD(0x628438)))
-    # (Line 55) }
-    # (Line 57) function GetPlayerEpd(player)
+    # (Line 56) }
+    # (Line 58) function GetPlayerEpd(player)
 
-# (Line 58) {
+# (Line 59) {
 @EUDFunc
 def GetPlayerEpd(player):
-    # (Line 59) return EPD_Players[player];
+    # (Line 60) return EPD_Players[player];
     EUDReturn(EPD_Players[player])
-    # (Line 60) }
-    # (Line 62) function InitPlayerLocation(player)
+    # (Line 61) }
+    # (Line 63) function InitPlayerLocation(player)
 
-# (Line 63) {
+# (Line 64) {
 @EUDFunc
 def InitPlayerLocation(player):
-    # (Line 64) var x, y;
+    # (Line 65) var x, y;
     x, y = EUDCreateVariables(2)
-    # (Line 65) if(player == 0) { x=1; y=1; }
+    # (Line 66) if(player == 0) { x=1; y=1; }
     if EUDIf()(player == 0):
         x << (1)
         y << (1)
-        # (Line 66) if(player == 1) { x=18; y=1; }
+        # (Line 67) if(player == 1) { x=18; y=1; }
     EUDEndIf()
     if EUDIf()(player == 1):
         x << (18)
         y << (1)
-        # (Line 67) if(player == 2) { x=1; y=11; }
+        # (Line 68) if(player == 2) { x=1; y=11; }
     EUDEndIf()
     if EUDIf()(player == 2):
         x << (1)
         y << (11)
-        # (Line 68) if(player == 3) { x=18; y=11; }
+        # (Line 69) if(player == 3) { x=18; y=11; }
     EUDEndIf()
     if EUDIf()(player == 3):
         x << (18)
         y << (11)
-        # (Line 69) if(player == 4) { x=1; y=6; }
+        # (Line 70) if(player == 4) { x=1; y=6; }
     EUDEndIf()
     if EUDIf()(player == 4):
         x << (1)
         y << (6)
-        # (Line 70) if(player == 5) { x=18; y=6; }
+        # (Line 71) if(player == 5) { x=18; y=6; }
     EUDEndIf()
     if EUDIf()(player == 5):
         x << (18)
         y << (6)
-        # (Line 72) const x2, y2 = Map.GetTileXY(x, y);
+        # (Line 73) const x2, y2 = Map.GetTileXY(x, y);
     EUDEndIf()
     x2, y2 = List2Assignable([Map.GetTileXY(x, y)])
-    # (Line 73) Helpers.EUDSetLocation(loclist[player], x2, y2);
+    # (Line 74) Helpers.EUDSetLocation(loclist[player], x2, y2);
     Helpers.EUDSetLocation(loclist[player], x2, y2)
-    # (Line 74) }
-    # (Line 75) function InitPlayer(player)
+    # (Line 75) }
+    # (Line 76) function InitPlayer(player)
 
-# (Line 76) {
+# (Line 77) {
 @EUDFunc
 def InitPlayer(player):
-    # (Line 77) SetPlayerEpd(player);
+    # (Line 78) SetPlayerEpd(player);
     SetPlayerEpd(player)
-    # (Line 78) InitPlayerLocation(player);
+    # (Line 79) InitPlayerLocation(player);
     InitPlayerLocation(player)
-    # (Line 79) CreateUnit(1, UnitID_Civilian, loclist[player]+1, player);
+    # (Line 80) CreateUnit(1, UnitID_Civilian, loclist[player]+1, player);
     DoActions(CreateUnit(1, UnitID_Civilian, loclist[player] + 1, player))
-    # (Line 80) SetBombNumber(player, 1);
+    # (Line 81) SetBombNumber(player, 1);
     SetBombNumber(player, 1)
-    # (Line 81) SetBombRange(player, 1);
+    # (Line 82) SetBombRange(player, 1);
     SetBombRange(player, 1)
-    # (Line 82) PlayerSpeed[player] = 1000;
+    # (Line 83) PlayerSpeed[player] = 1000;
     _ARRW(PlayerSpeed, player) << (1000)
-    # (Line 83) if(Helpers.GetDeath(player, 216) == 0)
+    # (Line 84) if(Helpers.GetDeath(player, 216) == 0)
     if EUDIf()(Helpers.GetDeath(player, 216) == 0):
-        # (Line 84) {
-        # (Line 85) SetDeaths(player, SetTo, 1, 216);
+        # (Line 85) {
+        # (Line 86) SetDeaths(player, SetTo, 1, 216);
         DoActions(SetDeaths(player, SetTo, 1, 216))
-        # (Line 86) CenterView(loclist[player]+1);
+        # (Line 87) CenterView(loclist[player]+1);
         DoActions(CenterView(loclist[player] + 1))
-        # (Line 87) }
         # (Line 88) }
+        # (Line 89) }
     EUDEndIf()
-    # (Line 89) function FollowLocation(player)
+    # (Line 90) function FollowLocation(player)
 
-# (Line 90) {
+# (Line 91) {
 @EUDFunc
 def FollowLocation(player):
-    # (Line 91) if(Command(player, AtLeast, 1, '(men)'))
+    # (Line 92) if(Command(player, AtLeast, 1, '(men)'))
     if EUDIf()(Command(player, AtLeast, 1, '(men)')):
-        # (Line 92) MoveLocation(loclist[player]+1, '(men)', player, '20x13');
+        # (Line 93) MoveLocation(loclist[player]+1, '(men)', player, '20x13');
         DoActions(MoveLocation(loclist[player] + 1, '(men)', player, '20x13'))
-        # (Line 93) }
+        # (Line 94) }
     EUDEndIf()
-    # (Line 94) function ItemCollect(player)
+    # (Line 95) function ItemCollect(player)
 
-# (Line 95) {
+# (Line 96) {
 @EUDFunc
 def ItemCollect(player):
-    # (Line 96) const item = GetItem(player);
+    # (Line 97) const item = GetItem(player);
     item = GetItem(player)
-    # (Line 97) if(item != 0)
+    # (Line 98) if(item != 0)
     if EUDIf()(item == 0, neg=True):
-        # (Line 98) RemoveUnitAt(1, item, loclist[player]+1, Computer);
+        # (Line 99) RemoveUnitAt(1, item, loclist[player]+1, Computer);
         DoActions(RemoveUnitAt(1, item, loclist[player] + 1, Computer))
-        # (Line 99) }
+        # (Line 100) }
     EUDEndIf()
-    # (Line 101) function PlaceBomb(unitEpd)
+    # (Line 102) function PlaceBomb(unitEpd)
 
-# (Line 102) {
+# (Line 103) {
 @EUDFunc
 def PlaceBomb(unitEpd):
-    # (Line 103) const player = Helpers.GetPlayerID(unitEpd);
+    # (Line 104) const player = Helpers.GetPlayerID(unitEpd);
     player = Helpers.GetPlayerID(unitEpd)
-    # (Line 105) if(Helpers.GetBuildQueue1(unitEpd) == $U('Zerg Mutalisk'))
+    # (Line 106) if(Helpers.GetBuildQueue1(unitEpd) == $U('Zerg Mutalisk'))
     if EUDIf()(Helpers.GetBuildQueue1(unitEpd) == EncodeUnit('Zerg Mutalisk')):
-        # (Line 106) {
-        # (Line 107) if(GetBombNumber(player) > GetCurrentBN(player))
+        # (Line 107) {
+        # (Line 108) if(GetBombNumber(player) > GetCurrentBN(player))
         if EUDIf()(GetBombNumber(player) <= GetCurrentBN(player), neg=True):
-            # (Line 108) {
-            # (Line 109) const x, y = Map.GetTileIndex(unitEpd);
+            # (Line 109) {
+            # (Line 110) const x, y = Map.GetTileIndex(unitEpd);
             x, y = List2Assignable([Map.GetTileIndex(unitEpd)])
-            # (Line 110) const x2, y2 = Map.GetTileXY(x, y);
+            # (Line 111) const x2, y2 = Map.GetTileXY(x, y);
             x2, y2 = List2Assignable([Map.GetTileXY(x, y)])
-            # (Line 111) Helpers.EUDSetLocation(loc, x2, y2);
+            # (Line 112) Helpers.EUDSetLocation(loc, x2, y2);
             Helpers.EUDSetLocation(loc, x2, y2)
-            # (Line 113) if(Map.GetMapXY(x,y) == 0)
+            # (Line 114) if(Map.GetMapXY(x,y) == 0)
             if EUDIf()(Map.GetMapXY(x, y) == 0):
-                # (Line 114) {
-                # (Line 115) const unitEpd = epdread_epd(EPD(0x628438));
+                # (Line 115) {
+                # (Line 116) const unitEpd = epdread_epd(EPD(0x628438));
                 unitEpd_1 = f_epdread_epd(EPD(0x628438))
-                # (Line 116) CreateUnit(1, UnitID_Bomb, loc +1, player);
-                DoActions(CreateUnit(1, UnitID_Bomb, loc + 1, player))
-                # (Line 117) Bomb.NewBomb(unitEpd);			// Mark at map
-                Bomb.NewBomb(unitEpd_1)
-                # (Line 118) SetBombWayBlock(unitEpd, 0); 	// no collision on egg
+                # (Line 117) CreateUnit(1, UnitID_Bomb, locBC +1, player);
+                DoActions(CreateUnit(1, UnitID_Bomb, locBC + 1, player))
+                # (Line 118) SetBombWayBlock(unitEpd, 0); 	// no collision on bomb
                 SetBombWayBlock(unitEpd_1, 0)
-                # (Line 119) SetBombTimer(unitEpd, 10); 		// bomb timer
+                # (Line 119) MoveUnit(1, UnitID_Bomb, player, locBC +1, loc+1);
+                DoActions(MoveUnit(1, UnitID_Bomb, player, locBC + 1, loc + 1))
+                # (Line 120) Bomb.NewBomb(unitEpd);			// Mark at map
+                Bomb.NewBomb(unitEpd_1)
+                # (Line 121) SetBombTimer(unitEpd, 10); 		// bomb timer
                 SetBombTimer(unitEpd_1, 10)
-                # (Line 120) const range = GetBombRange(player);
+                # (Line 122) const range = GetBombRange(player);
                 range = GetBombRange(player)
-                # (Line 121) SetRangeAtBomb(unitEpd, range); // Mark bomb range inside bom
+                # (Line 123) SetRangeAtBomb(unitEpd, range); // Mark bomb range inside bom
                 SetRangeAtBomb(unitEpd_1, range)
-                # (Line 122) }
-                # (Line 123) }
+                # (Line 124) }
+                # (Line 125) }
             EUDEndIf()
-            # (Line 125) Helpers.ResetBuildQueue(unitEpd);
+            # (Line 127) Helpers.ResetBuildQueue(unitEpd);
         EUDEndIf()
         Helpers.ResetBuildQueue(unitEpd)
-        # (Line 126) }
-        # (Line 127) }
+        # (Line 128) }
+        # (Line 129) }
     EUDEndIf()
-    # (Line 129) function SetBombWayBlock(unitEpd, bool)
+    # (Line 131) function SetBombWayBlock(unitEpd, bool)
 
-# (Line 130) {//union offset(space for rally & psi)
+# (Line 132) {
 @EUDFunc
 def SetBombWayBlock(unitEpd, bool):
-    # (Line 131) Helpers.SetBuildQueue1(unitEpd, bool);
-    Helpers.SetBuildQueue1(unitEpd, bool)
-    # (Line 132) }
-    # (Line 133) function IsBombWayBlocked(unitEpd)
-
-# (Line 134) {//union offset(space for rally & psi)
-@EUDFunc
-def IsBombWayBlocked(unitEpd):
-    # (Line 135) const bool = Helpers.GetBuildQueue1(unitEpd);
-    bool = Helpers.GetBuildQueue1(unitEpd)
-    # (Line 136) if(bool == 0)
+    # (Line 133) const noCollisionFlag = 0xA00000;
+    noCollisionFlag = 0xA00000
+    # (Line 134) const unitFlag = dwread_epd(unitEpd + 0x0DC/4);
+    unitFlag = f_dwread_epd(unitEpd + 0x0DC // 4)
+    # (Line 135) if(bool == 0)
     if EUDIf()(bool == 0):
-        # (Line 137) return 0;
-        EUDReturn(0)
-        # (Line 138) else
-        # (Line 139) return 1;
-    if EUDElse()():
-        EUDReturn(1)
+        # (Line 136) SetMemoryEPD(unitEpd + 0x0DC/4, SetTo, unitFlag | noCollisionFlag);
+        DoActions(SetMemoryEPD(unitEpd + 0x0DC // 4, SetTo, unitFlag | noCollisionFlag))
+        # (Line 137) else if (unitFlag == (unitFlag | noCollisionFlag))
+    if EUDElseIf()(unitFlag == (unitFlag | noCollisionFlag)):
+        # (Line 138) SetMemoryEPD(unitEpd + 0x0DC/4, Subtract, noCollisionFlag);
+        DoActions(SetMemoryEPD(unitEpd + 0x0DC // 4, Subtract, noCollisionFlag))
         # (Line 140) }
     EUDEndIf()
-    # (Line 141) function SetBombTimer(unitEpd, time)
+    # (Line 141) function IsBombWayBlocked(unitEpd)
 
 # (Line 142) {
 @EUDFunc
-def SetBombTimer(unitEpd, time):
-    # (Line 143) SetMemoryEPD(unitEpd + 0x114/4, SetTo, time);
-    DoActions(SetMemoryEPD(unitEpd + 0x114 // 4, SetTo, time))
-    # (Line 144) }
-    # (Line 145) function GetBombRange(player)
+def IsBombWayBlocked(unitEpd):
+    # (Line 143) const noCollisionFlag = 0xA00000;
+    noCollisionFlag = 0xA00000
+    # (Line 144) const unitFlag = dwread_epd(unitEpd + 0x0DC/4);
+    unitFlag = f_dwread_epd(unitEpd + 0x0DC // 4)
+    # (Line 145) if(unitFlag == (unitFlag | noCollisionFlag))
+    if EUDIf()(unitFlag == (unitFlag | noCollisionFlag)):
+        # (Line 146) return 0;
+        EUDReturn(0)
+        # (Line 147) else
+        # (Line 148) return 1;
+    if EUDElse()():
+        EUDReturn(1)
+        # (Line 149) }
+    EUDEndIf()
+    # (Line 150) function SetBombTimer(unitEpd, time)
 
-# (Line 146) {
+# (Line 151) {
+@EUDFunc
+def SetBombTimer(unitEpd, time):
+    # (Line 152) SetMemoryEPD(unitEpd + 0x114/4, SetTo, time);
+    DoActions(SetMemoryEPD(unitEpd + 0x114 // 4, SetTo, time))
+    # (Line 153) }
+    # (Line 154) function GetBombRange(player)
+
+# (Line 155) {
 @EUDFunc
 def GetBombRange(player):
-    # (Line 147) for(var i = 0; i<12; i++)
+    # (Line 156) for(var i = 0; i<12; i++)
     i = EUDVariable()
     i << (0)
     if EUDWhile()(i >= 12, neg=True):
         def _t2():
             i.__iadd__(1)
-        # (Line 148) if(Accumulate(player, Exactly, i, Gas))
+        # (Line 157) if(Accumulate(player, Exactly, i, Gas))
         if EUDIf()(Accumulate(player, Exactly, i, Gas)):
-            # (Line 149) return i;
+            # (Line 158) return i;
             EUDReturn(i)
-            # (Line 150) }
+            # (Line 159) }
         EUDEndIf()
         EUDSetContinuePoint()
         _t2()
     EUDEndWhile()
-    # (Line 151) function SetBombRange(player, number)
+    # (Line 160) function SetBombRange(player, number)
 
-# (Line 152) {
+# (Line 161) {
 @EUDFunc
 def SetBombRange(player, number):
-    # (Line 153) SetResources(player, SetTo, number, Gas);
+    # (Line 162) SetResources(player, SetTo, number, Gas);
     DoActions(SetResources(player, SetTo, number, Gas))
-    # (Line 154) }
-    # (Line 155) function GetCurrentBN(player)
+    # (Line 163) }
+    # (Line 164) function GetCurrentBN(player)
 
-# (Line 156) {
+# (Line 165) {
 @EUDFunc
 def GetCurrentBN(player):
-    # (Line 157) for(var i = 0; i<12; i++)
+    # (Line 166) for(var i = 0; i<12; i++)
     i = EUDVariable()
     i << (0)
     if EUDWhile()(i >= 12, neg=True):
         def _t2():
             i.__iadd__(1)
-        # (Line 158) if(Command(player, Exactly, i, UnitID_Bomb))
+        # (Line 167) if(Command(player, Exactly, i, UnitID_Bomb))
         if EUDIf()(Command(player, Exactly, i, UnitID_Bomb)):
-            # (Line 159) return i;
+            # (Line 168) return i;
             EUDReturn(i)
-            # (Line 161) }
+            # (Line 170) }
         EUDEndIf()
         EUDSetContinuePoint()
         _t2()
     EUDEndWhile()
-    # (Line 162) function GetBombNumber(player)
+    # (Line 171) function GetBombNumber(player)
 
-# (Line 163) {
+# (Line 172) {
 @EUDFunc
 def GetBombNumber(player):
-    # (Line 164) for(var i = 0; i<12; i++)
+    # (Line 173) for(var i = 0; i<12; i++)
     i = EUDVariable()
     i << (0)
     if EUDWhile()(i >= 12, neg=True):
         def _t2():
             i.__iadd__(1)
-        # (Line 165) if(Accumulate(player, Exactly, i, Ore))
+        # (Line 174) if(Accumulate(player, Exactly, i, Ore))
         if EUDIf()(Accumulate(player, Exactly, i, Ore)):
-            # (Line 166) return i;
+            # (Line 175) return i;
             EUDReturn(i)
-            # (Line 167) }
+            # (Line 176) }
         EUDEndIf()
         EUDSetContinuePoint()
         _t2()
     EUDEndWhile()
-    # (Line 168) function SetBombNumber(player, number)
+    # (Line 177) function SetBombNumber(player, number)
 
-# (Line 169) {
+# (Line 178) {
 @EUDFunc
 def SetBombNumber(player, number):
-    # (Line 170) SetResources(player, SetTo, number, Ore);
+    # (Line 179) SetResources(player, SetTo, number, Ore);
     DoActions(SetResources(player, SetTo, number, Ore))
-    # (Line 171) }
-    # (Line 173) function GetRangeAtBomb(unitEpd)
+    # (Line 180) }
+    # (Line 182) function GetRangeAtBomb(unitEpd)
 
-# (Line 174) {
+# (Line 183) {
 @EUDFunc
 def GetRangeAtBomb(unitEpd):
-    # (Line 175) return dwread_epd(unitEpd + 0xFC/4);
+    # (Line 184) return dwread_epd(unitEpd + 0xFC/4);
     EUDReturn(f_dwread_epd(unitEpd + 0xFC // 4))
-    # (Line 176) }
-    # (Line 178) function SetRangeAtBomb(unitEpd, range)
+    # (Line 185) }
+    # (Line 187) function SetRangeAtBomb(unitEpd, range)
 
-# (Line 179) {//union offset(space for rally & psi)
+# (Line 188) {//union offset(space for rally & psi)
 @EUDFunc
 def SetRangeAtBomb(unitEpd, range):
-    # (Line 180) dwwrite_epd(unitEpd + 0xFC/4, range);
+    # (Line 189) dwwrite_epd(unitEpd + 0xFC/4, range);
     f_dwwrite_epd(unitEpd + 0xFC // 4, range)
-    # (Line 181) }
-    # (Line 183) function GetItem(player)
+    # (Line 190) }
+    # (Line 192) function GetItem(player)
 
-# (Line 184) {
+# (Line 193) {
 @EUDFunc
 def GetItem(player):
-    # (Line 185) for(var i=0; i<6; i++)
+    # (Line 194) for(var i=0; i<6; i++)
     i = EUDVariable()
     i << (0)
     if EUDWhile()(i >= 6, neg=True):
         def _t2():
             i.__iadd__(1)
-        # (Line 186) {
-        # (Line 187) const item = ItemList[i];
+        # (Line 195) {
+        # (Line 196) const item = ItemList[i];
         item = ItemList[i]
-        # (Line 188) if(Bring(Computer, AtLeast, 1, item, loclist[player]+1))
+        # (Line 197) if(Bring(Computer, AtLeast, 1, item, loclist[player]+1))
         if EUDIf()(Bring(Computer, AtLeast, 1, item, loclist[player] + 1)):
-            # (Line 189) {
-            # (Line 191) if(item == Item_rangeUp)
+            # (Line 198) {
+            # (Line 200) if(item == Item_rangeUp)
             if EUDIf()(item == Item_rangeUp):
-                # (Line 192) {
-                # (Line 193) const bombRange = GetBombRange(player);
+                # (Line 201) {
+                # (Line 202) const bombRange = GetBombRange(player);
                 bombRange = GetBombRange(player)
-                # (Line 194) if(bombRange < MaxRange)
+                # (Line 203) if(bombRange < MaxRange)
                 if EUDIf()(bombRange >= MaxRange, neg=True):
-                    # (Line 195) {
-                    # (Line 196) DisplayText("\x07[ Range + ]");
+                    # (Line 204) {
+                    # (Line 205) DisplayText("\x07[ Range + ]");
                     DoActions(DisplayText("\x07[ Range + ]"))
-                    # (Line 197) SetBombRange(player, bombRange+1);
+                    # (Line 206) SetBombRange(player, bombRange+1);
                     SetBombRange(player, bombRange + 1)
-                    # (Line 198) return item;
+                    # (Line 207) return item;
                     EUDReturn(item)
-                    # (Line 199) }
-                    # (Line 200) return 0;
+                    # (Line 208) }
+                    # (Line 209) return 0;
                 EUDEndIf()
                 EUDReturn(0)
-                # (Line 201) }
-                # (Line 203) if(item == Item_speedUp)
+                # (Line 210) }
+                # (Line 212) if(item == Item_speedUp)
             EUDEndIf()
             if EUDIf()(item == Item_speedUp):
-                # (Line 204) {
-                # (Line 205) if(MemoryEPD(GetPlayerEpd(player) + 0x034 /4, AtMost, 1900) || PlayerSpeed[player] > 1900)
+                # (Line 213) {
+                # (Line 214) if(MemoryEPD(GetPlayerEpd(player) + 0x034 /4, AtMost, 1900) || PlayerSpeed[player] > 1900)
                 if EUDIf()(EUDSCOr()(MemoryEPD(GetPlayerEpd(player) + 0x034 // 4, AtMost, 1900))(PlayerSpeed[player] <= 1900, neg=True)()):
-                    # (Line 206) {
-                    # (Line 207) DisplayText("\x07[ Speed + ]");
+                    # (Line 215) {
+                    # (Line 216) DisplayText("\x07[ Speed + ]");
                     DoActions(DisplayText("\x07[ Speed + ]"))
-                    # (Line 208) SetMemoryEPD(GetPlayerEpd(player) + 0x034 /4, Add, 100);
+                    # (Line 217) SetMemoryEPD(GetPlayerEpd(player) + 0x034 /4, Add, 100);
                     DoActions(SetMemoryEPD(GetPlayerEpd(player) + 0x034 // 4, Add, 100))
-                    # (Line 209) PlayerSpeed[player] = PlayerSpeed[player] + 100;
+                    # (Line 218) PlayerSpeed[player] = PlayerSpeed[player] + 100;
                     _ARRW(PlayerSpeed, player) << (PlayerSpeed[player] + 100)
-                    # (Line 210) return item;
+                    # (Line 219) return item;
                     EUDReturn(item)
-                    # (Line 211) }
-                    # (Line 212) return 0;
+                    # (Line 220) }
+                    # (Line 221) return 0;
                 EUDEndIf()
                 EUDReturn(0)
-                # (Line 213) }
-                # (Line 215) if(item == Item_bombNUp)
+                # (Line 222) }
+                # (Line 224) if(item == Item_bombNUp)
             EUDEndIf()
             if EUDIf()(item == Item_bombNUp):
-                # (Line 216) {
-                # (Line 217) const bombNumber = GetBombNumber(player);
+                # (Line 225) {
+                # (Line 226) const bombNumber = GetBombNumber(player);
                 bombNumber = GetBombNumber(player)
-                # (Line 218) if(bombNumber < MaxBomb)
+                # (Line 227) if(bombNumber < MaxBomb)
                 if EUDIf()(bombNumber >= MaxBomb, neg=True):
-                    # (Line 219) {
-                    # (Line 220) DisplayText("\x07[ Bomb + ]");
+                    # (Line 228) {
+                    # (Line 229) DisplayText("\x07[ Bomb + ]");
                     DoActions(DisplayText("\x07[ Bomb + ]"))
-                    # (Line 221) SetBombNumber(player, bombNumber+1);
+                    # (Line 230) SetBombNumber(player, bombNumber+1);
                     SetBombNumber(player, bombNumber + 1)
-                    # (Line 222) return item;
+                    # (Line 231) return item;
                     EUDReturn(item)
-                    # (Line 223) }
-                    # (Line 224) return 0;
+                    # (Line 232) }
+                    # (Line 233) return 0;
                 EUDEndIf()
                 EUDReturn(0)
-                # (Line 225) }
-                # (Line 227) if(item == Item_rangeMax)
+                # (Line 234) }
+                # (Line 236) if(item == Item_rangeMax)
             EUDEndIf()
             if EUDIf()(item == Item_rangeMax):
-                # (Line 228) {
-                # (Line 229) const bombRange = GetBombRange(player);
+                # (Line 237) {
+                # (Line 238) const bombRange = GetBombRange(player);
                 bombRange = GetBombRange(player)
-                # (Line 230) if(bombRange < MaxRange)
+                # (Line 239) if(bombRange < MaxRange)
                 if EUDIf()(bombRange >= MaxRange, neg=True):
-                    # (Line 231) {
-                    # (Line 232) DisplayText("\x07[ Range ++ ]");
+                    # (Line 240) {
+                    # (Line 241) DisplayText("\x07[ Range ++ ]");
                     DoActions(DisplayText("\x07[ Range ++ ]"))
-                    # (Line 233) SetBombRange(player, bombRange+2);
+                    # (Line 242) SetBombRange(player, bombRange+2);
                     SetBombRange(player, bombRange + 2)
-                    # (Line 234) return item;
+                    # (Line 243) return item;
                     EUDReturn(item)
-                    # (Line 235) }
-                    # (Line 236) return 0;
+                    # (Line 244) }
+                    # (Line 245) return 0;
                 EUDEndIf()
                 EUDReturn(0)
-                # (Line 237) }
-                # (Line 239) if(item == Item_rideTank)
+                # (Line 246) }
+                # (Line 248) if(item == Item_rideTank)
             EUDEndIf()
             if EUDIf()(item == Item_rideTank):
-                # (Line 240) {
-                # (Line 241) if(Command(player, Exactly, 1, UnitID_Civilian))
+                # (Line 249) {
+                # (Line 250) if(Command(player, Exactly, 1, UnitID_Civilian))
                 if EUDIf()(Command(player, Exactly, 1, UnitID_Civilian)):
-                    # (Line 242) {
-                    # (Line 243) PlayerSpeed[player] = dwread_epd(GetPlayerEpd(player) + 0x034 /4);
+                    # (Line 251) {
+                    # (Line 252) PlayerSpeed[player] = dwread_epd(GetPlayerEpd(player) + 0x034 /4);
                     _ARRW(PlayerSpeed, player) << (f_dwread_epd(GetPlayerEpd(player) + 0x034 // 4))
-                    # (Line 244) RemoveUnit(UnitID_Civilian, player);
+                    # (Line 253) RemoveUnit(UnitID_Civilian, player);
                     DoActions(RemoveUnit(UnitID_Civilian, player))
-                    # (Line 245) SetPlayerEpd(player);
+                    # (Line 254) SetPlayerEpd(player);
                     SetPlayerEpd(player)
-                    # (Line 246) const chance = Helpers.GetRandom(0,2);
+                    # (Line 255) const chance = Helpers.GetRandom(0,2);
                     chance = Helpers.GetRandom(0, 2)
-                    # (Line 247) if(chance == 1)
+                    # (Line 256) if(chance == 1)
                     if EUDIf()(chance == 1):
-                        # (Line 248) {
-                        # (Line 249) CreateUnit(1, UnitID_Tank, loclist[player]+1, player);
+                        # (Line 257) {
+                        # (Line 258) CreateUnit(1, UnitID_Tank, loclist[player]+1, player);
                         DoActions(CreateUnit(1, UnitID_Tank, loclist[player] + 1, player))
-                        # (Line 250) SetDeaths(player, SetTo, 1, UnitID_Tank);
+                        # (Line 259) SetDeaths(player, SetTo, 1, UnitID_Tank);
                         DoActions(SetDeaths(player, SetTo, 1, UnitID_Tank))
-                        # (Line 251) }
-                        # (Line 252) else
-                        # (Line 253) {
+                        # (Line 260) }
+                        # (Line 261) else
+                        # (Line 262) {
                     if EUDElse()():
-                        # (Line 254) CreateUnit(1, UnitID_Goliath, loclist[player]+1, player);
+                        # (Line 263) CreateUnit(1, UnitID_Goliath, loclist[player]+1, player);
                         DoActions(CreateUnit(1, UnitID_Goliath, loclist[player] + 1, player))
-                        # (Line 255) SetDeaths(player, SetTo, 1, UnitID_Goliath);
+                        # (Line 264) SetDeaths(player, SetTo, 1, UnitID_Goliath);
                         DoActions(SetDeaths(player, SetTo, 1, UnitID_Goliath))
-                        # (Line 256) }
-                        # (Line 257) return item;
+                        # (Line 265) }
+                        # (Line 266) return item;
                     EUDEndIf()
                     EUDReturn(item)
-                    # (Line 258) }
-                    # (Line 259) return 0;
+                    # (Line 267) }
+                    # (Line 268) return 0;
                 EUDEndIf()
                 EUDReturn(0)
-                # (Line 261) }
-                # (Line 262) if(item == Item_rideHide)
+                # (Line 270) }
+                # (Line 271) if(item == Item_rideHide)
             EUDEndIf()
             if EUDIf()(item == Item_rideHide):
-                # (Line 263) {
-                # (Line 264) if(1)
+                # (Line 272) {
+                # (Line 273) if(1)
                 if EUDIf()(1):
-                    # (Line 265) {
-                    # (Line 269) DisplayText("\x07똥을 밟았다.");
+                    # (Line 274) {
+                    # (Line 278) DisplayText("\x07똥을 밟았다.");
                     DoActions(DisplayText("\x07똥을 밟았다."))
-                    # (Line 270) return item;
+                    # (Line 279) return item;
                     EUDReturn(item)
-                    # (Line 271) }
-                    # (Line 272) return 0;
+                    # (Line 280) }
+                    # (Line 281) return 0;
                 EUDEndIf()
                 EUDReturn(0)
-                # (Line 274) }
-                # (Line 275) }
+                # (Line 283) }
+                # (Line 284) }
             EUDEndIf()
-            # (Line 276) }
+            # (Line 285) }
         EUDEndIf()
-        # (Line 277) }
+        # (Line 286) }
         EUDSetContinuePoint()
         _t2()
     EUDEndWhile()
-    # (Line 279) function OffRide(player)
+    # (Line 288) function OffRide(player)
 
-# (Line 280) {
+# (Line 289) {
 @EUDFunc
 def OffRide(player):
-    # (Line 281) if(Command(player, Exactly, 0, '(men)'))
+    # (Line 290) if(Command(player, Exactly, 0, '(men)'))
     if EUDIf()(Command(player, Exactly, 0, '(men)')):
-        # (Line 282) {
-        # (Line 283) if(Helpers.GetDeath(player, UnitID_Tank) > 0 || Helpers.GetDeath(player, UnitID_Goliath) > 0)
+        # (Line 291) {
+        # (Line 292) if(Helpers.GetDeath(player, UnitID_Tank) > 0 || Helpers.GetDeath(player, UnitID_Goliath) > 0)
         if EUDIf()(EUDSCOr()(Helpers.GetDeath(player, UnitID_Tank) <= 0, neg=True)(Helpers.GetDeath(player, UnitID_Goliath) <= 0, neg=True)()):
-            # (Line 284) {
-            # (Line 285) if(Bomb.boom == 0)
+            # (Line 293) {
+            # (Line 294) if(Bomb.boom == 0)
             if EUDIf()(Bomb.boom == 0):
-                # (Line 286) {
-                # (Line 287) SetPlayerEpd(player);
+                # (Line 295) {
+                # (Line 296) SetPlayerEpd(player);
                 SetPlayerEpd(player)
-                # (Line 288) CreateUnit(1, UnitID_Civilian, loclist[player]+1, player);
+                # (Line 297) CreateUnit(1, UnitID_Civilian, loclist[player]+1, player);
                 DoActions(CreateUnit(1, UnitID_Civilian, loclist[player] + 1, player))
-                # (Line 289) SetMemoryEPD(GetPlayerEpd(player) + 0x034 /4, SetTo, PlayerSpeed[player]);
+                # (Line 298) SetMemoryEPD(GetPlayerEpd(player) + 0x034 /4, SetTo, PlayerSpeed[player]);
                 DoActions(SetMemoryEPD(GetPlayerEpd(player) + 0x034 // 4, SetTo, PlayerSpeed[player]))
-                # (Line 290) SetDeaths(player, SetTo, 0, UnitID_Tank);
+                # (Line 299) SetDeaths(player, SetTo, 0, UnitID_Tank);
                 DoActions(SetDeaths(player, SetTo, 0, UnitID_Tank))
-                # (Line 291) SetDeaths(player, SetTo, 0, UnitID_Goliath);
+                # (Line 300) SetDeaths(player, SetTo, 0, UnitID_Goliath);
                 DoActions(SetDeaths(player, SetTo, 0, UnitID_Goliath))
-                # (Line 292) }
-                # (Line 293) }
+                # (Line 301) }
+                # (Line 302) }
             EUDEndIf()
-            # (Line 294) }
+            # (Line 303) }
         EUDEndIf()
-        # (Line 295) }
+        # (Line 304) }
     EUDEndIf()

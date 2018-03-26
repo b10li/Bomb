@@ -100,9 +100,6 @@ function BombWayBlock(unitEpd)
 		if(bool == 0)
 		{// no one is on bomb
 			Player.SetBombWayBlock(unitEpd, 1);
-			const x, y = Map.GetTileXY(i, j);
-			Helpers.EUDSetLocation(loc2, x, y);
-			CreateUnit(1, 129, loc2+1, Computer); //way blocker
 		}
 	}
 }
