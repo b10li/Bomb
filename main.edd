@@ -1,5 +1,7 @@
 [main]
 input:empty.scx
-output:Bomberman.scx
+output:[EUD]BomberZerg.xxx.scx
+[MurakamiShiinaQC.py]
+A; 0x68C144, Exactly, 0: 200, 1
+
 [src\Main.eps]
-[eudTurbo]

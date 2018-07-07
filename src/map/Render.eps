@@ -1,0 +1,33 @@
+//------------- Renderer.eps
+import map.Mapper;
+import util.EUDTrig;
+import util.Header;
+
+const fillLoc 	= $L('draw');
+
+function fill(x, y, style);
+function DrawMap() {
+	for (var y = 0; y < Mapper.col; y++) {
+		for (var x = 0; x < Mapper.row; x++) {
+			const tile = Mapper.Map[x + y *Mapper.row];
+			var style;
+			if 		(tile == 0) style = -1;		 // 바깥
+			else if (tile == 1) style = 220;		// 안	1== Unitid_wall
+			else 				style = 221;		// 벽
+			fill(x, y, style);
+		}
+	}
+}
+
+function fill(x, y, style) {
+	if(style == -1) return;
+	const x2, y2 = Mapper.getTileXY(x, y);
+	EUDTrig.EUDMoveLocation(fillLoc, x2, y2);
+	CreateUnit(1, style, fillLoc + 1, Header.Computer);
+}
+
+function ClearMap()
+{
+	RemoveUnit('(any unit)', Header.Computer);
+	RemoveUnit('(any unit)', $Force1);
+}

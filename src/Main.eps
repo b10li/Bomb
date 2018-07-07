@@ -1,19 +1,31 @@
-import Player;
-import Bomb;
-import Map;
+import player.pMain;
+import player.Bomb;
+import player.Unit;
+import map.Mapper;
+import map.Render;
+import EUDEdit;
 
 var GameState;
+const PlayerLife = EUDArray(6);
 
-function onPluginStart()
-{
-	randomize();
-	LeaderBoardComputerPlayers(Disable);
-	LeaderBoardScore(Custom, "/2");
-}
 function RoundStart();
 function RoundEnd();
 function DisplayTextToAllPlayers(number);
 function GameEnd(player);
+function DatEdit();
+function PlayerDeath(player);
+
+function onPluginStart()
+{
+	EUDPlayerLoop()();
+	DisplayText("\r\n\r\n\r\n\r\n\r\n\x13\x1b폭탄: [\x07 A \x1b] 키\r\n\r\n\r\n\r\n\r\n");
+	EUDEndPlayerLoop();
+	randomize();
+	LeaderBoardComputerPlayers(Disable);
+	LeaderBoardScore(Custom, "/2");
+	EUDEdit.DatEdit();
+}
+
 function beforeTriggerExec() 
 {
 	if(GameState == 0)
@@ -28,10 +40,11 @@ function beforeTriggerExec()
 		var player = getcurpl();
 		if(player < 6)
 		{
-			Player.PlaceBomb(Player.GetPlayerEpd(player));
-			Player.FollowLocation(player);
-			Player.ItemCollect(player);
-			Player.OffRide(player);
+			pMain.PlaceBomb(Unit.getPlayerEpd(player));
+			pMain.FollowLocation(player);
+			pMain.ItemCollect(player);
+			pMain.OffRide(player);
+			PlayerDeath(player);
 		}
 		EUDEndPlayerLoop();
 		RoundEnd();
@@ -44,30 +57,45 @@ function afterTriggerExec()
 	// eudturbo
 	SetMemory(0x6509A0, SetTo, 0);  
 }
+
 function RoundStart()
 {
-	Map.ClearMap();
-	Map.GetMap();
-	Map.Render();
+	Render.ClearMap();
+	Mapper.getMap();
+	Render.DrawMap();
 	
 	EUDPlayerLoop()();
 	var player = getcurpl();
 	if(player < 6) //P1~P6
-		Player.InitPlayer(player);
+		pMain.InitPlayer(player);
+	PlayerLife[player] = 1;
 	EUDEndPlayerLoop();
 	GameState = 1; // <------------------
 }
 
+function PlayerDeath(player)
+{
+	if(Command(player, Exactly, 0, '(men)'))
+	{
+		if(Deaths(player, Exactly, 0, 3) && Deaths(player, Exactly, 0, 5))
+		{
+			PlayerLife[player] = 0;
+		}
+	}
+}
+
 function RoundEnd()
 {
-
-	if(Command($Force1, AtMost, 1, '(men)') && 
-		Command(7, Exactly, 0, 15) &&
-		Accumulate($Force1, AtLeast, 1, OreAndGas))
-	{//Time Counter
-		SetDeaths(7, Add, 1, 200);
+	EUDPlayerLoop()();
+	// check player solo 
+	if(getcurpl() < 6) {
+		if(PlayerLife[getcurpl()]) {
+			SetDeaths(7, Add, 1, 199);
+		}
 	}
-	if(Deaths(7, AtLeast, 24, 200))
+	EUDEndPlayerLoop();
+
+	if(Deaths(7, Exactly, 1, 199) && Accumulate($Force1, AtLeast, 1, OreAndGas))
 	{
 		if(Command($Force1, AtMost, 1, '(men)'))
 		{
@@ -81,13 +109,11 @@ function RoundEnd()
 			GameEnd(player);
 			EUDEndPlayerLoop();
 			GameState = 0; // <------------------
-			SetDeaths(7, SetTo, 0, 200);
 			LeaderBoardScore(Custom, "/2");
 		}
-		else
-			SetDeaths(7, SetTo, 0, 200);
 	}
-
+	// reset count
+	SetDeaths(7, SetTo, 0, 199);
 }
 
 function GameEnd(player)
@@ -113,3 +139,4 @@ function DisplayTextToAllPlayers(number)
 	else if(number == 5) DisplayText("\r\n\r\n\r\n\r\n\r\n\x13똥색이 이겼다\r\n\r\n\r\n\r\n\r\n");
 	EUDEndPlayerLoop();
 }
+

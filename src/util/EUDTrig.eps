@@ -1,0 +1,114 @@
+// Math --------------------------------
+function getRandom(low, high) {
+	return (rand() % (high - low)) + low;
+}
+
+function min(a, b) {
+	if(a > b) return b;
+	else return a;
+}
+
+function abs(x) {
+	if(x >= 0x80000000) {
+		x = -x;
+	}
+	return x;
+}
+
+
+// EUD --------------------------------
+function getDeath(player, unit)
+{
+	for(var i=0; i<50; i++)
+		if(Deaths(player, Exactly, i, unit))
+			return i;
+}
+
+function EUDMoveLocation(locID, x, y) 
+{
+	const locscale = 15;
+	dwwrite_epd(EPD(0x58DC60) + 5 * locID + 0, x - locscale);
+	dwwrite_epd(EPD(0x58DC60) + 5 * locID + 1, y - locscale);
+	dwwrite_epd(EPD(0x58DC60) + 5 * locID + 2, x + locscale);
+	dwwrite_epd(EPD(0x58DC60) + 5 * locID + 3, y + locscale);
+}
+
+function EUDGetLocation(locID)
+{
+	const l = dwread_epd(EPD(0x58DC60) + 5 * locID + 0);
+	const u = dwread_epd(EPD(0x58DC60) + 5 * locID + 1);
+	const r = dwread_epd(EPD(0x58DC60) + 5 * locID + 2);
+	const d = dwread_epd(EPD(0x58DC60) + 5 * locID + 3);
+
+	return (l+r)/2, (u+d)/2;
+}
+
+function setpcolor(pnum, color) 
+{
+	const pcolor_dst = 0x581D76 + 8 * pnum;
+	const mcolor_dst = 0x581DD6 + pnum;
+	bwrite(pcolor_dst, color);
+	bwrite(mcolor_dst, color);
+}
+
+function setOrderTo(unitEpd, orderID)
+{
+	const player = dwbreak(dwread_epd(unitEpd + 0x4C / 4))[[2]];
+	SetMemoryEPD(unitEpd + 0x4C / 4, SetTo, player + orderID * 256);
+}
+
+function IsOrder(unitEpd, orderID)
+{
+	const order = dwbreak(dwread_epd(unitEpd + 0x4C / 4))[[3]];
+	if(order == orderID)
+		return 1;
+	else
+		return 0;
+
+}
+
+
+function getPlayerID(unitEpd)
+{
+    if(unitEpd != 0)
+        return dwbreak(dwread_epd(unitEpd + (0x4C / 4)))[[2]];
+    else 
+        return 0;
+}
+
+function getUnitXY(unitEpd)
+{
+    if(unitEpd != 0)
+        return dwbreak(dwread_epd(unitEpd + (0x28 / 4)))[[0,1]];
+    else
+        return 0, 0;
+}
+
+function getUnitType(unitEpd)
+{
+    if(unitEpd != 0)
+        return dwbreak(dwread_epd(unitEpd + (0x64 / 4)))[[3]];
+    else
+        return 0;
+}
+
+function IsColliding(unitEpd)
+{
+	const noCollisionFlag = 0xA00000;
+	const unitFlag = dwread_epd(unitEpd + 0x0DC/4);
+	if(unitFlag == (unitFlag | noCollisionFlag))
+		return 0;
+	else 
+		return 1;
+}
+
+function setCollision(unitEpd, bool)
+{
+	const noCollisionFlag = 0xA00000;
+	const unitFlag = dwread_epd(unitEpd + 0x0DC/4);
+	if(bool == 0)
+		SetMemoryEPD(unitEpd + 0x0DC/4, SetTo, unitFlag | noCollisionFlag);
+	else if (unitFlag == (unitFlag | noCollisionFlag))
+		SetMemoryEPD(unitEpd + 0x0DC/4, Subtract, noCollisionFlag);
+
+}

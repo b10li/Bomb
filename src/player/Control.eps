@@ -1,0 +1,24 @@
+const KeyDeath = 200;
+const KeyValue = EUDArray(9);
+function KeyRecog(targetPlayer)
+{// file 'main.edd'
+	// keyboard recognization
+	
+	if(Switch(targetPlayer, Set))
+	{// key delay
+		if(Deaths(targetPlayer, Exactly, 1, KeyDeath)) 
+		{
+			SetSwitch(targetPlayer, Clear);
+			KeyValue[targetPlayer] = 1;
+		}
+	}
+	else//Switch(targetPlayer, Cleared)
+	{// key up
+		if(!Deaths(targetPlayer, Exactly, 1, KeyDeath))
+		{
+			SetSwitch(targetPlayer, Set);
+			return KeyValue[targetPlayer];
+		}
+	}
+	return 0;
+}
