@@ -1,11 +1,11 @@
-const EPD_Players = EUDArray(6);	
+const PlayerEpd = EUDArray(6);	
 
 function setPlayerEpd(player)
 {
-	EPD_Players[player] = epdread_epd(EPD(0x628438));
+	PlayerEpd[player] = epdread_epd(EPD(0x628438));
 }
 
 function getPlayerEpd(player)
 {
-	return EPD_Players[player];
+	return PlayerEpd[player];
 }

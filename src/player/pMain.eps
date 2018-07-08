@@ -66,14 +66,13 @@ function InitPlayer(player)
 {
 	Unit.setPlayerEpd(player);
 	InitPlayerLocation(player);
-	CreateUnit(1, UnitID_Civilian, loclist[player]+1, player);
+	CreateUnitWithProperties(1, UnitID_Civilian, loclist[player]+1, player, UnitProperty(invincible = true));
 	setBombNumber(player, 1);
 	setBombRange(player, 1);
 	PlayerSpeed[player] = 1000;
 	if(EUDTrig.getDeath(player, 216) == 0)
 	{
 		SetDeaths(player, SetTo, 1, 216);
-		CenterView(loclist[player]+1);
 	}
 }
 function FollowLocation(player)
@@ -99,21 +98,24 @@ function PlaceBomb(unitEpd)
 	if(Control.KeyRecog(player))
 	{
 		if(getBombNumber(player) > getCurrentBN(player))
-		{
+		{// 폭탄 갯수
 			const x, y = Mapper.getTileIndex(unitEpd);
 			const x2, y2 = Mapper.getTileXY(x, y);
 			EUDTrig.EUDMoveLocation(loc, x2, y2);
 
+			if(Bring(player, AtLeast, 1, UnitID_Bomb, locBC +1))
+				return;
 			if(Mapper.getMapXY(x,y) == 0)
-			{
+			{// 빈공간
 				const unitEpd = epdread_epd(EPD(0x628438));
-				CreateUnit(1, UnitID_Bomb, locBC +1, player);
+				CreateUnitWithProperties(1, UnitID_Bomb, locBC +1, player, UnitProperty(invincible = true));
 				EUDTrig.setCollision(unitEpd, 0); // no collision on bomb
 				MoveUnit(1, UnitID_Bomb, player, locBC +1, loc+1);
 
 				Bomb.NewBomb(unitEpd); // Mark at map
 				setBombTimer(unitEpd, 10); // bomb timer
 				setRangeAtBomb(unitEpd, getBombRange(player)); // Mark bomb range inside bom
+				PlayWAV("sound\\glue\\mouseover.wav");
 			}
 		}	
 	}
@@ -142,10 +144,10 @@ function getItem(player)
 			// Speed +
 			if(item == Item_speedUp)
 			{
-				if(MemoryEPD(Unit.getPlayerEpd(player) + 0x034 /4, AtMost, 1900) || PlayerSpeed[player] > 1900)
+				if(MemoryEPD(Unit.PlayerEpd[player] + 0x034 /4, AtMost, 1900) || PlayerSpeed[player] > 1900)
 				{
 					DisplayText("\x07[ Speed + ]");
-					SetMemoryEPD(Unit.getPlayerEpd(player) + 0x034 /4, Add, 100);
+					SetMemoryEPD(Unit.PlayerEpd[player] + 0x034 /4, Add, 100);
 					PlayerSpeed[player] = PlayerSpeed[player] + 100;
 					return item;
 				}
@@ -163,14 +165,14 @@ function getItem(player)
 				}
 				return 0;
 			}
-			// Range Max
+			// Range +
 			if(item == Item_rangeMax)
 			{
 				const bombRange = getBombRange(player);
 				if(bombRange < MaxRange)
 				{
-					DisplayText("\x07[ Range ++ ]");
-					setBombRange(player, bombRange+2);
+					DisplayText("\x07[ Range + ]");
+					setBombRange(player, bombRange+1);
 					return item;
 				}
 				return 0;
@@ -180,20 +182,19 @@ function getItem(player)
 			{
 				if(Command(player, Exactly, 1, UnitID_Civilian))
 				{
-					PlayerSpeed[player] = dwread_epd(Unit.getPlayerEpd(player) + 0x034 /4);
-					RemoveUnit(UnitID_Civilian, player);
+					PlayerSpeed[player] = dwread_epd(Unit.PlayerEpd[player] + 0x034 /4);
 					Unit.setPlayerEpd(player);
 					const chance = EUDTrig.getRandom(0,2);
 					if(chance == 1)
-					{
-						CreateUnit(1, UnitID_Tank, loclist[player]+1, player);
+					{// tank
+						CreateUnitWithProperties(1, UnitID_Tank, loclist[player]+1, player, UnitProperty(invincible = true));
 						SetDeaths(player, SetTo, 1, UnitID_Tank);
-					}
-					else
-					{
-						CreateUnit(1, UnitID_Goliath, loclist[player]+1, player);
+					} else
+					{// goliath
+						CreateUnitWithProperties(1, UnitID_Goliath, loclist[player]+1, player, UnitProperty(invincible = true));
 						SetDeaths(player, SetTo, 1, UnitID_Goliath);
 					}
+					RemoveUnit(UnitID_Civilian, player);
 					return item;
 				}
 				return 0;
@@ -203,7 +204,7 @@ function getItem(player)
 			{
 				if(1)
 				{
-					//const unitEpd = Unit.getPlayerEpd(player);
+					//const unitEpd = Unit.PlayerEpd[player];
 					//const statusFlag = dwread_epd(unitEpd + 0x0DC/4);
 					//SetMemoryEPD(unitEpd + 0x0DC/4, SetTo, statusFlag | 0x200);
 					DisplayText("\x07똥을 밟았다.");
@@ -218,15 +219,19 @@ function getItem(player)
 
 function OffRide(player)
 {
-	if(Command(player, Exactly, 0, '(men)'))
+	if(Command(player, Exactly, 0, UnitID_Civilian) 
+		&& Command(player, Exactly, 0, UnitID_Tank) 
+		&& Command(player, Exactly, 0, UnitID_Goliath))
 	{
-		if(Deaths(player, AtLeast, 1, UnitID_Tank) || Deaths(player, AtLeast, 1, UnitID_Goliath))
+		if(!Deaths(player, Exactly, 0, UnitID_Tank) || !Deaths(player, Exactly, 0, UnitID_Goliath))
 		{
 			if(Bomb.boom == 0)
 			{
 				Unit.setPlayerEpd(player);
-				CreateUnit(1, UnitID_Civilian, loclist[player]+1, player);
-				SetMemoryEPD(Unit.getPlayerEpd(player) + 0x034 /4, SetTo, PlayerSpeed[player]);
+				CreateUnitWithProperties(1, UnitID_Civilian, loclist[player]+1, player, UnitProperty(invincible = true));
+				RemoveUnit(UnitID_Tank, player);
+				RemoveUnit(UnitID_Goliath, player);
+				SetMemoryEPD(Unit.PlayerEpd[player] + 0x034 /4, SetTo, PlayerSpeed[player]);
 				SetDeaths(player, SetTo, 0, UnitID_Tank);
 				SetDeaths(player, SetTo, 0, UnitID_Goliath);
 			}

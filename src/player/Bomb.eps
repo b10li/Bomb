@@ -96,7 +96,7 @@ function BombWayBlock(unitEpd)
 		var bool = 0;
 		EUDPlayerLoop()();
 		const player = getcurpl();
-		const px, py = Mapper.getTileIndex(Unit.getPlayerEpd(player));
+		const px, py = Mapper.getTileIndex(Unit.PlayerEpd[player]);
 		if(px == i && py == j)
 		{// player is on bomb
 			bool = 1;
@@ -116,7 +116,7 @@ function Boom()
 		for(var j=0; j<col; j++)
 		{
 			if(Mapper.getMapXY(i, j) == UnitID_Fire)
-			{
+			{// 불
 				Mapper.setMapXY(i, j, 0);
 				const x, y = Mapper.getTileXY(i, j);
 				EUDTrig.EUDMoveLocation(loc2, x, y);
@@ -125,7 +125,7 @@ function Boom()
 				CreateUnit(1, UnitID_Fire, loc2+1, Computer);
 			}
 			if(Mapper.getMapXY(i, j) == DeadBox)
-			{
+			{// 상자
 				Mapper.setMapXY(i, j, 0);
 				const x, y = Mapper.getTileXY(i, j);
 				EUDTrig.EUDMoveLocation(loc2, x, y);

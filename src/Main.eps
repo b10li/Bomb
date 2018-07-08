@@ -10,20 +10,22 @@ const PlayerLife = EUDArray(6);
 
 function RoundStart();
 function RoundEnd();
-function DisplayTextToAllPlayers(number);
+function WinnerText(number);
 function GameEnd(player);
 function DatEdit();
 function PlayerDeath(player);
+function ReadyCount();
 
 function onPluginStart()
 {
-	EUDPlayerLoop()();
-	DisplayText("\r\n\r\n\r\n\r\n\r\n\x13\x1b폭탄: [\x07 A \x1b] 키\r\n\r\n\r\n\r\n\r\n");
-	EUDEndPlayerLoop();
 	randomize();
 	LeaderBoardComputerPlayers(Disable);
 	LeaderBoardScore(Custom, "/2");
 	EUDEdit.DatEdit();
+	EUDPlayerLoop()();
+	DisplayText("\r\n\r\n\r\n\r\n\r\n\x13\x1b폭탄: [\x07 A \x1b] 키\r\n\r\n\r\n\r\n\r\n");
+	EUDEndPlayerLoop();
+    bwrite(0x581D76 + 8 * $P8, 40);
 }
 
 function beforeTriggerExec() 
@@ -35,27 +37,69 @@ function beforeTriggerExec()
 
 	if(GameState == 1)
 	{
+		RemoveUnit('(men)', $P12);
 		Bomb.CheckBomb();
 		EUDPlayerLoop()();
 		var player = getcurpl();
 		if(player < 6)
 		{
-			pMain.PlaceBomb(Unit.getPlayerEpd(player));
+			PlayerDeath(player);
+			pMain.PlaceBomb(Unit.PlayerEpd[player]);
 			pMain.FollowLocation(player);
 			pMain.ItemCollect(player);
 			pMain.OffRide(player);
-			PlayerDeath(player);
 		}
 		EUDEndPlayerLoop();
 		RoundEnd();
 	}
 
+	if(GameState == 3)
+	{// before count
+		SetDeaths(7, SetTo, 24*4, 226);
+		GameState = 2;
+	}
+
+	if(GameState == 2)
+	{// countdown
+		ReadyCount();
+	}
 }
 
 function afterTriggerExec() 
 {
 	// eudturbo
 	SetMemory(0x6509A0, SetTo, 0);  
+}
+
+function ReadyCount()
+{
+	SetDeaths(7, Subtract, 1, 226);
+	if(Deaths(7, Exactly, 24*3, 226))
+	{
+		EUDPlayerLoop()();
+		PlayWAV("sound\\glue\\countdown.wav");
+		EUDEndPlayerLoop();
+	}
+	if(Deaths(7, Exactly, 24*2, 226))
+	{
+		EUDPlayerLoop()();
+		PlayWAV("sound\\glue\\countdown.wav");
+		EUDEndPlayerLoop();
+	}
+	if(Deaths(7, Exactly, 24*1, 226))
+	{
+		EUDPlayerLoop()();
+		PlayWAV("sound\\glue\\countdown.wav");
+		EUDEndPlayerLoop();
+	}
+	if(Deaths(7, Exactly, 0, 226))
+	{
+		EUDPlayerLoop()();
+		PlayWAV("sound\\Protoss\\ZEALOT\\PZeRdy00.wav");
+		DisplayText("\r\n\r\n\r\n\r\n\r\n\x13\x1b게임 시작!\r\n\r\n\r\n\r\n\r\n");
+		EUDEndPlayerLoop();
+		GameState = 1;
+	}
 }
 
 function RoundStart()
@@ -70,12 +114,12 @@ function RoundStart()
 		pMain.InitPlayer(player);
 	PlayerLife[player] = 1;
 	EUDEndPlayerLoop();
-	GameState = 1; // <------------------
+	GameState = 3; // <------------------
 }
 
 function PlayerDeath(player)
 {
-	if(Command(player, Exactly, 0, '(men)'))
+	if(Command(player, Exactly, 0, 15) && Command(player, Exactly, 0, 3) && Command(player, Exactly, 0, 5))
 	{
 		if(Deaths(player, Exactly, 0, 3) && Deaths(player, Exactly, 0, 5))
 		{
@@ -86,49 +130,48 @@ function PlayerDeath(player)
 
 function RoundEnd()
 {
-	EUDPlayerLoop()();
-	// check player solo 
-	if(getcurpl() < 6) {
-		if(PlayerLife[getcurpl()]) {
-			SetDeaths(7, Add, 1, 199);
-		}
+	for(var player=0; player<6; player++)
+	{// check player solo 
+		if(!playerexist(player)) continue;
+		if(PlayerLife[player]) SetDeaths(7, Add, 1, 199);
 	}
-	EUDEndPlayerLoop();
 
 	if(Deaths(7, Exactly, 1, 199) && Accumulate($Force1, AtLeast, 1, OreAndGas))
-	{
-		if(Command($Force1, AtMost, 1, '(men)'))
+	{// solo survive
+		for(var player=0; player<6; player++)
 		{
-			EUDPlayerLoop()();
-			const player = getcurpl();
-			if(Command(player, Exactly, 1, '(men)'))
-			{
-				SetScore(player, Add, 1, Custom);	// win score
-				DisplayTextToAllPlayers(player);
+			if(!playerexist(player)) continue;
+			if(PlayerLife[player])
+			{// win score
+				SetScore(player, Add, 1, Custom);	
+				WinnerText(player);
+				break;
 			}
-			GameEnd(player);
-			EUDEndPlayerLoop();
-			GameState = 0; // <------------------
-			LeaderBoardScore(Custom, "/2");
 		}
+		GameState = 0; // <------------------
+		LeaderBoardScore(Custom, "/2");
+		GameEnd();
+
 	}
 	// reset count
 	SetDeaths(7, SetTo, 0, 199);
 }
 
-function GameEnd(player)
+function GameEnd()
 {
 	for(var i=0; i<6; i++)
 	{
-		if (Score(i, Custom, Exactly, 2))
+		if (Score(i, Custom, AtLeast, 2))
 		{
-			DisplayTextToAllPlayers(i);
-			Victory();
+			EUDPlayerLoop()();
+			if(getcurpl() < 6)
+				Victory();
+			EUDEndPlayerLoop();
 		}
 	}
 }
 
-function DisplayTextToAllPlayers(number)
+function WinnerText(number)
 {
 	EUDPlayerLoop()();
 	if(number == 0) DisplayText("\r\n\r\n\r\n\r\n\r\n\x13빨강이 이겼다\r\n\r\n\r\n\r\n\r\n");

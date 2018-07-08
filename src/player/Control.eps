@@ -1,4 +1,4 @@
-const KeyDeath = 200;
+const KeyDeath = 227;
 const KeyValue = EUDArray(9);
 function KeyRecog(targetPlayer)
 {// file 'main.edd'
@@ -14,7 +14,7 @@ function KeyRecog(targetPlayer)
 	}
 	else//Switch(targetPlayer, Cleared)
 	{// key up
-		if(!Deaths(targetPlayer, Exactly, 1, KeyDeath))
+		if(Deaths(targetPlayer, Exactly, 0, KeyDeath))
 		{
 			SetSwitch(targetPlayer, Set);
 			return KeyValue[targetPlayer];
